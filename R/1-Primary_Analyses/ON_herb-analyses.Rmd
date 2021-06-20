@@ -82,21 +82,6 @@ raw.SEM.data               <- read_csv("data/ON_herb-SEM.csv")
 ```
 
 ```{r Colour Palettes for Figures, include = FALSE}
-## Set colour palette (caleco | dudleya)
-dudleya.continuous <- cal_palette(name = "dudleya", n = 6, type = "continuous")
-show_col(dudleya.continuous)
-
-## Standard palette for the site map
-dudleya.map <- dudleya.continuous[c(1, 4, 7, 10, 12, 2)]
-
-## Standard palette for the 5 Cities
-dudleya.5 <- dudleya.continuous[c(1, 4, 7, 10, 12)]
-
-# Palette for connecting lines in the 5 cities
-dudleya.10.lines <- c("#7B3478", "#7B3478", "#3A5085", "#3A5085", "#3A5470", "#3A5470",
-											"#C27269", "#C27269", "#6D4847", "#6D4847")
-
-
 ## Set colour palette (caleco | superbloom3)
 superbloom.continuous <- cal_palette(name = "superbloom3", n = 20, type = "continuous")
 show_col(superbloom.continuous)
@@ -192,10 +177,10 @@ kable(tidy(Anova(pop.diversity.early.toronto, type = "II")),
 ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Diversity)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Diversity") +
 	ggtitle("Diversity, Early Toronto") +
 	theme_pubr()
@@ -251,8 +236,8 @@ ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	ggtitle("Diversity, Early 5 Cities")
 ```
 
@@ -292,10 +277,10 @@ kable(tidy(Anova(pop.diversity.late.toronto, type = "II")),
 ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Diversity)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Diversity") +
 	ggtitle("Diversity, Late Toronto") +
 	theme_pubr()
@@ -374,8 +359,8 @@ ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) +
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) +
 	ggtitle("Diversity, Late 5 Cities")
 ```
 
@@ -433,10 +418,10 @@ kable(tidy(Anova(pop.abundance.early.toronto, type = "II")),
 ggplot(
 	data = early.toronto.n.aphid,
 	aes(x = Distance, y = Abundance)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	ggtitle("Abundance, Early Toronto") +
 	theme_pubr()
@@ -520,8 +505,8 @@ ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) +
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) +
 	ggtitle("Abundance, Early 5 Cities")
 ```
 
@@ -560,10 +545,10 @@ kable(tidy(Anova(pop.abundance.late.toronto, type = "II")),
 ggplot(
 	data = late.toronto.n.aphid,
 	aes(x = Distance, y = Abundance)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	ggtitle("Abundance, Late Toronto") +
 	theme_pubr()
@@ -641,8 +626,8 @@ ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) +
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) +
 	ggtitle("Abundance, Late 5 Cities")
 ```
 
@@ -696,9 +681,9 @@ kable(tidy(Anova(pop.avg.herbivory.early.toronto, type = "II")),
 ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Average_Leaf_Herbivory)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "lm", formula = y ~ x, se = TRUE,
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Average Leaf Herbivory") +
 	ggtitle("Average Leaf Herbivory, Early Toronto") +
 	theme_pubr()
@@ -775,8 +760,8 @@ ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) +
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) +
 	ggtitle("Average Leaf Herbivory, Early 5 Cities")
 ```
 
@@ -814,9 +799,9 @@ kable(tidy(Anova(pop.avg.herbivory.late.toronto, type = "II")),
 ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Average_Leaf_Herbivory)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "lm", formula = y ~ x, se = TRUE,
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Average Leaf Herbivory") +
 	ggtitle("Average Leaf Herbivory, Late Toronto") +
 	theme_pubr()
@@ -886,8 +871,8 @@ ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) +
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) +
 	ggtitle("Average Leaf Herbivory, Late 5 Cities")
 ```
 
@@ -948,10 +933,10 @@ kable(tidy(Anova(pop.danaus.early.toronto, type = "II")),
 ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Monarchs)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	ggtitle("Danaus, Early Toronto") +
 	theme_pubr()
@@ -1023,8 +1008,8 @@ ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	ggtitle("Danaus, Early 5 Cities")
 ```
 
@@ -1064,10 +1049,10 @@ kable(tidy(Anova(pop.danaus.late.toronto, type = "II")),
 ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Monarchs)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	ggtitle("Danaus, Late Toronto") +
 	theme_pubr()
@@ -1124,8 +1109,8 @@ ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	ggtitle("Danaus, Late 5 Cities")
 ```
 
@@ -1168,10 +1153,10 @@ kable(tidy(Anova(pop.rhysomatus.early.toronto, type = "II")),
 ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Rhysomatus)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	ggtitle("Rhysomatus, Early Toronto") +
 	theme_pubr()
@@ -1228,8 +1213,8 @@ ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	ggtitle("Rhysomatus, Early 5 Cities")
 ```
 
@@ -1269,10 +1254,10 @@ kable(tidy(Anova(pop.rhysomatus.late.toronto, type = "II")),
 ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Rhysomatus)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	ggtitle("Rhysomatus, Late Toronto") +
 	theme_pubr()
@@ -1322,10 +1307,10 @@ kable(tidy(Anova(pop.aphis.early.toronto, type = "II")),
 ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Green_aphid)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	ggtitle("Aphis, Early Toronto") +
 	theme_pubr()
@@ -1372,10 +1357,10 @@ kable(tidy(Anova(pop.aphis.late.toronto, type = "II")),
 ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Green_aphid)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	ggtitle("Aphis, Late Toronto") +
 	theme_pubr()
@@ -1425,10 +1410,10 @@ kable(tidy(Anova(pop.tetraopes.early.toronto, type = "II")),
 ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Tetraopes)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	ggtitle("Tetraopes, Early Toronto") +
 	theme_pubr()
@@ -1485,8 +1470,8 @@ ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	ggtitle("Tetraopes, Early 5 Cities")
 ```
 
@@ -1526,10 +1511,10 @@ kable(tidy(Anova(pop.tetraopes.late.toronto, type = "II")),
 ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Tetraopes)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	ggtitle("Tetraopes, Late Toronto") +
 	theme_pubr()
@@ -1579,10 +1564,10 @@ kable(tidy(Anova(pop.liriomyza.early.toronto, type = "II")),
 ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Fly)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	ggtitle("Liriomyza, Early Toronto") +
 	theme_pubr()
@@ -1639,8 +1624,8 @@ ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	ggtitle("Liriomyza, Early 5 Cities")
 ```
 
@@ -1680,10 +1665,10 @@ kable(tidy(Anova(pop.liriomyza.late.toronto, type = "II")),
 ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Fly)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	ggtitle("Liriomyza, Late Toronto") +
 	theme_pubr()
@@ -1775,8 +1760,8 @@ ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	ggtitle("Liriomyza, Late 5 Cities")
 ```
 

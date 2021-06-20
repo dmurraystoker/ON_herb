@@ -97,10 +97,10 @@ ggsave("fig_1-site_map.jpg",
 early.toronto.diversity.plot <- ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Diversity)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Diversity") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 1, 2, 3), limits = c(0, 3.75)) +
@@ -121,10 +121,10 @@ early.toronto.diversity.plot
 late.toronto.diversity.plot <- ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Diversity)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Diversity") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 1, 2, 3), limits = c(0, 3.75)) +
@@ -148,10 +148,10 @@ late.toronto.diversity.plot
 early.toronto.abundance.plot <- ggplot(
 	data = early.toronto.n.aphid,
 	aes(x = Distance, y = Abundance)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 5, 10, 15, 20)) +
@@ -173,10 +173,10 @@ early.toronto.abundance.plot
 late.toronto.abundance.plot <- ggplot(
 	data = late.toronto.n.aphid,
 	aes(x = Distance, y = Abundance)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 5, 10, 15, 20)) +
@@ -201,9 +201,9 @@ late.toronto.abundance.plot
 early.toronto.herbivory.plot <- ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Average_Leaf_Herbivory)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "lm", formula = y ~ x, se = TRUE,
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Average Leaf Herbivory") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 0.15, 0.30, 0.45)) +
@@ -223,9 +223,9 @@ early.toronto.herbivory.plot
 late.toronto.herbivory.plot <- ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Average_Leaf_Herbivory)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "lm", formula = y ~ x, se = TRUE,
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Average Leaf Herbivory") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 0.15, 0.30, 0.45)) +
@@ -290,8 +290,8 @@ early.5.cities.diversity.plot <- ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	scale_y_continuous(breaks = c(0, 1, 2)) +
 	coord_cartesian(ylim = c(0, 2.15)) +
 	ggtitle("a", subtitle = "Early Season") +
@@ -321,8 +321,8 @@ late.5.cities.diversity.plot <- ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	scale_y_continuous(breaks = c(0, 1, 2)) +
 	coord_cartesian(ylim = c(0, 2.15)) +
 	ggtitle("b", subtitle = "Late Season") +
@@ -355,8 +355,8 @@ early.5.cities.abundance.plot <- ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	scale_y_continuous(breaks = c(0, 2, 4, 6)) +
 	coord_cartesian(ylim = c(0, 6.75)) +
 	ggtitle("c", subtitle = "Early Season") +
@@ -386,8 +386,8 @@ late.5.cities.abundance.plot <- ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	scale_y_continuous(breaks = c(0, 2, 4, 6)) +
 	coord_cartesian(ylim = c(0, 6.75)) +
 	ggtitle("d", subtitle = "Late Season") +
@@ -419,8 +419,8 @@ early.5.cities.herbivory.plot <- ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	scale_y_continuous(breaks = c(0, 0.03, 0.06, 0.09, 0.12)) +
 	coord_cartesian(ylim = c(0, 0.135)) +
 	ggtitle("e", subtitle = "Early Season") +
@@ -448,8 +448,8 @@ late.5.cities.herbivory.plot <- ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	scale_y_continuous(breaks = c(0, 0.03, 0.06, 0.09, 0.12)) +
 	coord_cartesian(ylim = c(0, 0.135)) +
 	ggtitle("f", subtitle = "Late Season") +
@@ -494,10 +494,10 @@ ggsave("fig_3-5_cities_herbivores.jpg",
 early.toronto.danaus.plot <- ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Monarchs)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 5, 10, 15)) +
@@ -534,8 +534,8 @@ early.5.cites.danaus.plot <- ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	scale_y_continuous(breaks = c(0, 0.5, 1.0, 1.5)) +
 	coord_cartesian(ylim = c(0, 1.65)) +
 	ggtitle("b", subtitle = "Early Season") +
@@ -551,10 +551,10 @@ early.5.cites.danaus.plot
 late.toronto.danaus.plot <- ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Monarchs)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 5, 10, 15)) +
@@ -589,8 +589,8 @@ late.5.cites.danaus.plot <- ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	scale_y_continuous(breaks = c(0, 0.5, 1.0, 1.5)) +
 	coord_cartesian(ylim = c(0, 1.65)) +
 	ggtitle("d", subtitle = "Late Season") + 
@@ -628,10 +628,10 @@ ggsave("fig_S3-danaus_abundance.jpg",
 early.toronto.rhysomatus.plot <- ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Rhysomatus)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 0.5, 1.0, 1.5, 2.0)) +
@@ -668,8 +668,8 @@ early.5.cites.rhysomatus.plot <- ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8)) +
 	coord_cartesian(ylim = c(0, 0.9)) +
 	ggtitle("b", subtitle = "Early Season") +
@@ -683,10 +683,10 @@ early.5.cites.rhysomatus.plot
 late.toronto.rhysomatus.plot <- ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Rhysomatus)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 0.5, 1.0, 1.5, 2.0)) +
@@ -730,10 +730,10 @@ ggsave("fig_S1-rhysomatus_abundance.jpg",
 early.toronto.aphis.plot <- ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Green_aphid)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 10, 20, 30)) +
@@ -755,10 +755,10 @@ early.toronto.aphis.plot
 late.toronto.aphis.plot <- ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Green_aphid)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 10, 20, 30)) +
@@ -802,10 +802,10 @@ ggsave("fig_S4-aphis_abundance.jpg",
 early.toronto.tetraopes.plot <- ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Tetraopes)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 1, 2, 3, 4), limits = c(0, 4.25)) +
@@ -841,8 +841,8 @@ early.5.cites.tetraopes.plot <- ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8)) +
 	coord_cartesian(ylim = c(0, 0.9)) +
 	ggtitle("b", subtitle = "Early Season") +
@@ -856,10 +856,10 @@ early.5.cites.tetraopes.plot
 late.toronto.tetraopes.plot <- ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Tetraopes)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 1, 2, 3, 4), limits = c(0, 4.25)) +
@@ -902,10 +902,10 @@ ggsave("fig_S5-tetraopes_abundance.jpg",
 early.toronto.liriomyza.plot <- ggplot(
 	data = early.toronto,
 	aes(x = Distance, y = Fly)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 5, 10, 15, 20)) +
@@ -942,8 +942,8 @@ early.5.cites.liriomyza.plot <- ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	scale_y_continuous(breaks = c(0, 2, 4, 6, 8)) +
 	coord_cartesian(ylim = c(0, 8.5)) +
 	ggtitle("b", subtitle = "Early Season") +
@@ -959,10 +959,10 @@ early.5.cites.liriomyza.plot
 late.toronto.liriomyza.plot <- ggplot(
 	data = late.toronto,
 	aes(x = Distance, y = Fly)) + 
-	geom_point(colour = "#7B3478") + 
+	geom_point(colour = "#E69512") + 
 	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
 							method.args = list(family = "quasipoisson"),
-							colour = "#3A5085", fill = "#3A5470") +
+							colour = "#637EAA", fill = "#637EAA") +
 	labs(x = "Distance from City Center", y = "Abundance") +
 	scale_x_continuous(breaks = c(0, 10, 20, 30, 40), limits = c(0, 45)) +
 	scale_y_continuous(breaks = c(0, 5, 10, 15, 20)) +
@@ -997,8 +997,8 @@ late.5.cites.liriomyza.plot <- ggerrorplot(
 	) +
 	stat_summary(aes(group = City), fun = mean, geom = "path", 
 							 color = superbloom.10.lines) +
-	scale_x_discrete(labels = c("2" = "Urban", "1" = "Rural"),
-									 limits = c("2", "1")) + 
+	scale_x_discrete(labels = c("1" = "Urban", "2" = "Rural"),
+									 limits = c("1", "2")) + 
 	scale_y_continuous(breaks = c(0, 2, 4, 6, 8)) +
 	coord_cartesian(ylim = c(0, 8.5)) +ggtitle("d", subtitle = "Late Season") + 
 	font("xlab", size = 16, color = "gray0") +
