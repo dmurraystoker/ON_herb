@@ -1,0 +1,1124 @@
+---
+title: "ON_herb Piecewise SEMs"
+author: "David Murray-Stoker"
+output: 
+  pdf_document: 
+    fig_caption: yes
+always_allow_html: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+kableExtra::usepackage_latex("float")
+```
+
+```{r Load Package for RMarkdown, include = FALSE}
+library(kableExtra)
+library(knitr)
+```
+
+
+## Load Packages & Data
+
+Data and R packages required for data management and analyses are loaded into the environment using R (version 4.0.3, R Core Team 2020) in the RStudio environment (version 1.3.1073, RStudio Team 2020). Packages used for data management and statistical analyses:
+
+Data Management
+
+* tidyverse (version 1.3.0): data management
+
+Statistical Analyses
+
+* DHARMa (version 0.3.3.0): model diagnostics
+* MASS (version 7.3-53): negative binomial GLMs
+
+
+```{r Load Packages & Data, include = FALSE}
+library(broom)
+library(DHARMa)
+library(MASS)
+
+## Load the tidyverse
+library(tidyverse)
+
+## Read in data
+raw.SEM.data <- read_csv("data/ON_herb-SEM.csv")
+
+## Extract site info from the raw data
+site.info <- raw.SEM.data %>%
+  select(Population_ID, Pop, City, Trial, Lat, Long, Distance) %>%
+  unique()
+```
+
+```{r Abundance Data, include = FALSE}
+## Sum herbivore abundances from all 5 plants by trial + population
+# Danaus
+danaus.abundances <- aggregate(
+	Danaus ~ Trial + Population_ID,
+  data = raw.SEM.data, FUN = sum
+)
+
+# Rhysomatus
+rhysomatus.abundances <- aggregate(
+	Rhysomatus ~ Trial + Population_ID,
+  data = raw.SEM.data, FUN = sum
+)
+
+# Aphis
+aphis.abundances <- aggregate(
+	Aphis_nerii ~ Trial + Population_ID,
+  data = raw.SEM.data, FUN = sum
+)
+
+# Myzocallis
+myzocallis.abundances <- aggregate(
+	Myzocallis ~ Trial + Population_ID,
+  data = raw.SEM.data, FUN = sum
+)
+
+# Tetraopes
+tetraopes.abundances <- aggregate(
+	Tetraopes ~ Trial + Population_ID,
+  data = raw.SEM.data, FUN = sum
+)
+
+# Liriomyza
+liriomyza.abundances <- aggregate(
+	Liriomyza ~ Trial + Population_ID,
+  data = raw.SEM.data, FUN = sum
+)
+
+
+## Bind herbivore abundances together
+herbivore.abundances <- danaus.abundances %>%
+  left_join(rhysomatus.abundances) %>%
+  left_join(aphis.abundances) %>%
+  left_join(myzocallis.abundances) %>%
+  left_join(tetraopes.abundances) %>%
+  left_join(liriomyza.abundances)
+
+## Merge site info with abundance data
+abundance.data <- site.info %>%
+  full_join(herbivore.abundances)
+
+## Subset early data
+early.abundances <- abundance.data %>%
+  filter(Trial == "Early") %>%
+  rename(
+    Danaus.early = Danaus, Rhysomatus.early = Rhysomatus, Aphis.early = Aphis_nerii,
+    Myzocallis.early = Myzocallis, Tetraopes.early = Tetraopes, Liriomyza.early = Liriomyza
+  )
+
+## Remove trial column
+early.abundances <- early.abundances[, -4]
+
+## Subset late data
+late.abundances <- abundance.data %>%
+  filter(Trial == "Late") %>%
+  rename(
+    Danaus.late = Danaus, Rhysomatus.late = Rhysomatus, Aphis.late = Aphis_nerii,
+    Myzocallis.late = Myzocallis, Tetraopes.late = Tetraopes, Liriomyza.late = Liriomyza
+  )
+
+## Remove trial column
+late.abundances <- late.abundances[, -4]
+
+## Merge early and late info final abundance dataframe
+final.abundance.data <- early.abundances %>%
+  left_join(late.abundances) %>%
+  na.omit()
+```
+
+
+```{r Presence-Absence Data, include = FALSE}
+## Convert abundance matrices to presence-absence matrices
+# Danaus
+danaus.presabs <- danaus.abundances[, 3]
+danaus.presabs[danaus.presabs > 0] <- 1
+danaus.presabs.binary <- cbind(site.info, danaus.presabs)
+
+# Rhysomatus
+rhysomatus.presabs <- rhysomatus.abundances[, 3]
+rhysomatus.presabs[rhysomatus.presabs > 0] <- 1
+rhysomatus.presabs.binary <- cbind(site.info, rhysomatus.presabs)
+
+# Aphis
+aphis.presabs <- aphis.abundances[, 3]
+aphis.presabs[aphis.presabs > 0] <- 1
+aphis.presabs.binary <- cbind(site.info, aphis.presabs)
+
+# Myzocallis
+myzocallis.presabs <- myzocallis.abundances[, 3]
+myzocallis.presabs[myzocallis.presabs > 0] <- 1
+myzocallis.presabs.binary <- cbind(site.info, myzocallis.presabs)
+
+# Tetraopes
+tetraopes.presabs <- tetraopes.abundances[, 3]
+tetraopes.presabs[tetraopes.presabs > 0] <- 1
+tetraopes.presabs.binary <- cbind(site.info, tetraopes.presabs)
+
+# Liriomyza
+liriomyza.presabs <- liriomyza.abundances[, 3]
+liriomyza.presabs[liriomyza.presabs > 0] <- 1
+liriomyza.presabs.binary <- cbind(site.info, liriomyza.presabs)
+
+
+## Bind herbivore presence-absence together
+herbivore.presabs <- danaus.presabs.binary %>%
+  left_join(rhysomatus.presabs.binary) %>%
+  left_join(aphis.presabs.binary) %>%
+  left_join(myzocallis.presabs.binary) %>%
+  left_join(tetraopes.presabs.binary) %>%
+  left_join(liriomyza.presabs.binary)
+
+## Merge site info with presence-absence data
+presence.absence.data <- site.info %>%
+  full_join(herbivore.presabs)
+
+## Subset early data
+early.presence.absence <- presence.absence.data %>%
+  filter(Trial == "Early") %>%
+  rename(
+    Danaus.early = danaus.presabs, Rhysomatus.early = rhysomatus.presabs,
+    Aphis.early = aphis.presabs, Myzocallis.early = myzocallis.presabs,
+    Tetraopes.early = tetraopes.presabs, Liriomyza.early = liriomyza.presabs
+  )
+
+## Remove trial column
+early.presence.absence <- early.presence.absence[, -4]
+
+## Subset late data
+late.presence.absence <- presence.absence.data %>%
+  filter(Trial == "Late") %>%
+  rename(
+    Danaus.late = danaus.presabs, Rhysomatus.late = rhysomatus.presabs,
+    Aphis.late = aphis.presabs, Myzocallis.late = myzocallis.presabs,
+    Tetraopes.late = tetraopes.presabs, Liriomyza.late = liriomyza.presabs
+  )
+
+## Remove trial column
+late.presence.absence <- late.presence.absence[, -4]
+
+## Merge early and late info final presence-absence dataframe
+final.presence.absence.data <- early.presence.absence %>%
+  left_join(late.presence.absence) %>%
+  na.omit()
+```
+
+
+## Research Question
+How do urbanization herbivores interact between early and late season?
+
+## Model Fitting & Diagnostics
+
+Prior to fitting the pSEMs, each individual model was fitted and assumptions were visually inspected using the DHARMa package. Models were fitted for both abundance and presence-absence data. Abundance models were fitted using GLMs with a Poisson distribution and log-link function or negative binomial GLMs to account for overdispersion, while presence-absence models were fitted using GLMs with a binomial distribution and logit-link function.
+
+```{r Urban GLM (Abundance) Fitting, include = FALSE}
+## Danaus
+danaus.abundance.early.urb.toronto <- glm.nb(
+	Danaus.early ~ Distance,
+	data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+danaus.abundance.late.urb.toronto <- glm.nb(
+	Danaus.late ~ Distance,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+
+## Rhysomatus
+rhysomatus.abundance.early.urb.toronto <- glm.nb(
+	Rhysomatus.early ~ Distance,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+rhysomatus.abundance.late.urb.toronto <- glm.nb(
+	Rhysomatus.late ~ Distance,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+
+## Aphis
+aphis.abundance.early.urb.toronto <- glm(
+	Aphis.early ~ Distance,
+  data = final.abundance.data, family = poisson(link = "log")
+)
+aphis.abundance.late.urb.toronto <- glm(
+	Aphis.late ~ Distance,
+  data = final.abundance.data, family = poisson(link = "log")
+)
+
+## Myzocallis
+myzocallis.abundance.early.urb.toronto <- glm(
+	Myzocallis.early ~ Distance,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+myzocallis.abundance.late.urb.toronto <- glm(
+	Myzocallis.late ~ Distance,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+
+## Tetraopes
+tetraopes.abundance.early.urb.toronto <- glm.nb(
+	Tetraopes.early ~ Distance,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+tetraopes.abundance.late.urb.toronto <- glm.nb(
+	Tetraopes.late ~ Distance,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+
+## Liriomyza
+liriomyza.abundance.early.urb.toronto <- glm.nb(
+	Liriomyza.early ~ Distance,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+liriomyza.abundance.late.urb.toronto <- glm.nb(
+	Liriomyza.late ~ Distance,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+```
+
+```{r Urban GLM (Abundance) Diagnostics, include = FALSE}
+## Simulated residuals
+# Danaus abundance GLMs
+danaus.abundance.early.urb.toronto.sim.output <- simulateResiduals(
+	danaus.abundance.early.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+danaus.abundance.late.urb.toronto.sim.output <- simulateResiduals(
+	danaus.abundance.late.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Rhysomatus abundance GLMs
+rhysomatus.abundance.early.urb.toronto.sim.output <- simulateResiduals(
+	rhysomatus.abundance.early.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+rhysomatus.abundance.late.urb.toronto.sim.output <- simulateResiduals(
+	rhysomatus.abundance.late.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Aphis abundance GLMs
+aphis.abundance.early.urb.toronto.sim.output <- simulateResiduals(
+	aphis.abundance.early.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+aphis.abundance.late.urb.toronto.sim.output <- simulateResiduals(
+	aphis.abundance.late.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Myzocallis abundance GLMs
+myzocallis.abundance.early.urb.toronto.sim.output <- simulateResiduals(
+	myzocallis.abundance.early.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+myzocallis.abundance.late.urb.toronto.sim.output <- simulateResiduals(
+	myzocallis.abundance.late.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Tetraopes abundance GLMs
+tetraopes.abundance.early.urb.toronto.sim.output <- simulateResiduals(
+	tetraopes.abundance.early.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+tetraopes.abundance.late.urb.toronto.sim.output <- simulateResiduals(
+	tetraopes.abundance.late.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Liriomyza abundance GLMs
+liriomyza.abundance.early.urb.toronto.sim.output <- simulateResiduals(
+	liriomyza.abundance.early.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+liriomyza.abundance.late.urb.toronto.sim.output <- simulateResiduals(
+	liriomyza.abundance.late.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+
+## Visual assessments
+# Danaus abundance GLMs
+plot(danaus.abundance.early.urb.toronto.sim.output) # Good fit
+plot(danaus.abundance.late.urb.toronto.sim.output)  # Good fit
+
+# Rhysomatus abundance GLMs
+plot(rhysomatus.abundance.early.urb.toronto.sim.output) # Good fit
+plot(rhysomatus.abundance.late.urb.toronto.sim.output)  # Good fit
+
+# Aphis abundance GLMs
+plot(aphis.abundance.early.urb.toronto.sim.output) # Awful fit
+plot(aphis.abundance.late.urb.toronto.sim.output)  # Truly horrendous
+
+# Myzocallis abundance GLMs
+plot(myzocallis.abundance.early.urb.toronto.sim.output) # Poor fit
+plot(myzocallis.abundance.late.urb.toronto.sim.output)  # Good fit
+
+# Tetraopes abundance GLMs
+plot(tetraopes.abundance.early.urb.toronto.sim.output) # Good fit
+plot(tetraopes.abundance.late.urb.toronto.sim.output)  # Good fit
+
+# Liriomyza abundance GLMs
+plot(liriomyza.abundance.early.urb.toronto.sim.output) # Decent fit
+plot(liriomyza.abundance.late.urb.toronto.sim.output)  # Good fit
+```
+
+
+```{r Herbivore GLM (Abundance) Fitting, include = FALSE}
+## Danaus
+danaus.abundance.early.herb.toronto <- glm.nb(
+	Danaus.early ~ Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+	data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+danaus.abundance.late.herb.toronto <- glm.nb(
+	Danaus.late ~ Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+
+## Rhysomatus
+rhysomatus.abundance.late.herb.toronto <- glm.nb(
+	Rhysomatus.late ~ Rhysomatus.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+
+## Aphis
+aphis.abundance.early.herb.toronto <- glm(
+	Aphis.early ~ Danaus.early + Rhysomatus.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data, family = poisson(link = "log")
+)
+aphis.abundance.late.herb.toronto <- glm(
+	Aphis.late ~ Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data, family = poisson(link = "log")
+)
+
+## Myzocallis
+myzocallis.abundance.late.herb.toronto <- glm(
+	Myzocallis.late ~ Myzocallis.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+
+## Tetraopes
+tetraopes.abundance.early.herb.toronto <- glm.nb(
+	Tetraopes.early ~ Danaus.early + Rhysomatus.early + Aphis.early + Liriomyza.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+tetraopes.abundance.late.herb.toronto <- glm.nb(
+	Tetraopes.late ~ Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+
+## Liriomyza
+liriomyza.abundance.early.herb.toronto <- glm.nb(
+	Liriomyza.early ~ Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+liriomyza.abundance.late.herb.toronto <- glm.nb(
+	Liriomyza.late ~ Danaus.early + Rhysomatus.early + Aphis.early + Liriomyza.early + Liriomyza.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+```
+
+```{r Herbivore GLM (Abundance) Diagnostics, include = FALSE}
+## Simulated residuals
+# Danaus abundance GLMs
+danaus.abundance.early.herb.toronto.sim.output <- simulateResiduals(
+	danaus.abundance.early.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+danaus.abundance.late.herb.toronto.sim.output <- simulateResiduals(
+	danaus.abundance.late.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Rhysomatus abundance GLMs
+rhysomatus.abundance.late.herb.toronto.sim.output <- simulateResiduals(
+	rhysomatus.abundance.late.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Aphis abundance GLMs
+aphis.abundance.early.herb.toronto.sim.output <- simulateResiduals(
+	aphis.abundance.early.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+aphis.abundance.late.herb.toronto.sim.output <- simulateResiduals(
+	aphis.abundance.late.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Myzocallis abundance GLMs
+myzocallis.abundance.late.herb.toronto.sim.output <- simulateResiduals(
+	myzocallis.abundance.late.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Tetraopes abundance GLMs
+tetraopes.abundance.early.herb.toronto.sim.output <- simulateResiduals(
+	tetraopes.abundance.early.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+tetraopes.abundance.late.herb.toronto.sim.output <- simulateResiduals(
+	tetraopes.abundance.late.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Liriomyza abundance GLMs
+liriomyza.abundance.early.herb.toronto.sim.output <- simulateResiduals(
+	liriomyza.abundance.early.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+liriomyza.abundance.late.herb.toronto.sim.output <- simulateResiduals(
+	liriomyza.abundance.late.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+
+## Visual assessments
+# Danaus abundance GLMs
+plot(danaus.abundance.early.herb.toronto.sim.output) # Good fit
+plot(danaus.abundance.late.herb.toronto.sim.output)  # Good fit
+
+# Rhysomatus abundance GLMs
+plot(rhysomatus.abundance.late.herb.toronto.sim.output)  # Good fit
+
+# Aphis abundance GLMs
+plot(aphis.abundance.early.herb.toronto.sim.output) # Poor fit
+plot(aphis.abundance.late.herb.toronto.sim.output)  # Awful, miserable, terrible fit
+
+# Myzocallis abundance GLMs
+plot(myzocallis.abundance.late.herb.toronto.sim.output)  # Good fit
+
+# Tetraopes abundance GLMs
+plot(tetraopes.abundance.early.herb.toronto.sim.output) # Good fit
+plot(tetraopes.abundance.late.herb.toronto.sim.output)  # Good fit
+
+# Liriomyza abundance GLMs
+plot(liriomyza.abundance.early.herb.toronto.sim.output) # Good fit
+plot(liriomyza.abundance.late.herb.toronto.sim.output)  # Good fit
+```
+
+
+```{r Urban + Herbivore GLM (Abundance) Fitting, include = FALSE}
+## Danaus
+danaus.abundance.early.urb_herb.toronto <- glm.nb(
+	Danaus.early ~ Distance + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+	data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+danaus.abundance.late.urb_herb.toronto <- glm.nb(
+	Danaus.late ~ Distance + Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+
+## Rhysomatus
+rhysomatus.abundance.early.urb_herb.toronto <- glm.nb(
+	Rhysomatus.early ~ Distance,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+rhysomatus.abundance.late.urb_herb.toronto <- glm.nb(
+	Rhysomatus.late ~ Distance + Rhysomatus.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+
+## Aphis
+aphis.abundance.early.urb_herb.toronto <- glm(
+	Aphis.early ~ Distance + Danaus.early + Rhysomatus.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data, family = poisson(link = "log")
+)
+aphis.abundance.late.urb_herb.toronto <- glm(
+	Aphis.late ~ Distance + Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data, family = poisson(link = "log")
+)
+
+## Myzocallis
+myzocallis.abundance.early.urb_herb.toronto <- glm(
+	Myzocallis.early ~ Distance,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+myzocallis.abundance.late.urb_herb.toronto <- glm(
+	Myzocallis.late ~ Distance + Myzocallis.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+
+## Tetraopes
+tetraopes.abundance.early.urb_herb.toronto <- glm.nb(
+	Tetraopes.early ~ Distance + Danaus.early + Rhysomatus.early + Aphis.early + Liriomyza.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+tetraopes.abundance.late.urb_herb.toronto <- glm.nb(
+	Tetraopes.late ~ Distance + Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+
+## Liriomyza
+liriomyza.abundance.early.urb_herb.toronto <- glm.nb(
+	Liriomyza.early ~ Distance + Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+liriomyza.abundance.late.urb_herb.toronto <- glm.nb(
+	Liriomyza.late ~ Distance + Danaus.early + Rhysomatus.early + Aphis.early + Liriomyza.early + Liriomyza.early,
+  data = final.abundance.data[final.abundance.data$City == "Toronto", ]
+)
+```
+
+```{r Urban + Herbivore GLM (Abundance) Diagnostics, include = FALSE}
+## Simulated residuals
+# Danaus abundance GLMs
+danaus.abundance.early.urb_herb.toronto.sim.output <- simulateResiduals(
+	danaus.abundance.early.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+danaus.abundance.late.urb_herb.toronto.sim.output <- simulateResiduals(
+	danaus.abundance.late.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Rhysomatus abundance GLMs
+rhysomatus.abundance.early.urb_herb.toronto.sim.output <- simulateResiduals(
+	rhysomatus.abundance.early.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+rhysomatus.abundance.late.urb_herb.toronto.sim.output <- simulateResiduals(
+	rhysomatus.abundance.late.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Aphis abundance GLMs
+aphis.abundance.early.urb_herb.toronto.sim.output <- simulateResiduals(
+	aphis.abundance.early.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+aphis.abundance.late.urb_herb.toronto.sim.output <- simulateResiduals(
+	aphis.abundance.late.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Myzocallis abundance GLMs
+myzocallis.abundance.early.urb_herb.toronto.sim.output <- simulateResiduals(
+	myzocallis.abundance.early.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+myzocallis.abundance.late.urb_herb.toronto.sim.output <- simulateResiduals(
+	myzocallis.abundance.late.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Tetraopes abundance GLMs
+tetraopes.abundance.early.urb_herb.toronto.sim.output <- simulateResiduals(
+	tetraopes.abundance.early.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+tetraopes.abundance.late.urb_herb.toronto.sim.output <- simulateResiduals(
+	tetraopes.abundance.late.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Liriomyza abundance GLMs
+liriomyza.abundance.early.urb_herb.toronto.sim.output <- simulateResiduals(
+	liriomyza.abundance.early.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+liriomyza.abundance.late.urb_herb.toronto.sim.output <- simulateResiduals(
+	liriomyza.abundance.late.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+
+## Visual assessments
+# Danaus abundance GLMs
+plot(danaus.abundance.early.urb_herb.toronto.sim.output) # Good fit
+plot(danaus.abundance.late.urb_herb.toronto.sim.output)  # Good fit
+
+# Rhysomatus abundance GLMs
+plot(rhysomatus.abundance.early.urb_herb.toronto.sim.output) # Good fit
+plot(rhysomatus.abundance.late.urb_herb.toronto.sim.output)  # Good fit
+
+# Aphis abundance GLMs
+plot(aphis.abundance.early.urb_herb.toronto.sim.output) # Poor fit
+plot(aphis.abundance.late.urb_herb.toronto.sim.output)  # Awful, miserable, terrible fit
+
+# Myzocallis abundance GLMs
+plot(myzocallis.abundance.early.urb_herb.toronto.sim.output) # Poor fit
+plot(myzocallis.abundance.late.urb_herb.toronto.sim.output)  # Good fit
+
+# Tetraopes abundance GLMs
+plot(tetraopes.abundance.early.urb_herb.toronto.sim.output) # Good fit
+plot(tetraopes.abundance.late.urb_herb.toronto.sim.output)  # Good fit
+
+# Liriomyza abundance GLMs
+plot(liriomyza.abundance.early.urb_herb.toronto.sim.output) # Good fit
+plot(liriomyza.abundance.late.urb_herb.toronto.sim.output)  # Good fit
+```
+
+
+
+```{r Urban GLM (Presence-Absence) Fitting, include = FALSE}
+## Danaus
+danaus.presence.absence.early.urb.toronto <- glm(
+	Danaus.early ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+danaus.presence.absence.late.urb.toronto <- glm(
+	Danaus.late ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Rhysomatus
+rhysomatus.presence.absence.early.urb.toronto <- glm(
+	Rhysomatus.early ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+rhysomatus.presence.absence.late.urb.toronto <- glm(
+	Rhysomatus.late ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Aphis
+aphis.presence.absence.early.urb.toronto <- glm(
+	Aphis.early ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+aphis.presence.absence.late.urb.toronto <- glm(
+	Aphis.late ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Myzocallis
+myzocallis.presence.absence.early.urb.toronto <- glm(
+	Myzocallis.early ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+myzocallis.presence.absence.late.urb.toronto <- glm(
+	Myzocallis.late ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Tetraopes
+tetraopes.presence.absence.early.urb.toronto <- glm(
+	Tetraopes.early ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+tetraopes.presence.absence.late.urb.toronto <- glm(
+	Tetraopes.late ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Liriomyza
+liriomyza.presence.absence.early.urb.toronto <- glm(
+	Liriomyza.early ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+liriomyza.presence.absence.late.urb.toronto <- glm(
+	Liriomyza.late ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+```
+
+```{r Urban GLM (Presence-Absence) Diagnostics, include = FALSE}
+## Simulated residuals
+# Danaus presence-absence GLMs
+danaus.presence.absence.early.urb.toronto.sim.output <- simulateResiduals(
+	danaus.presence.absence.early.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+danaus.presence.absence.late.urb.toronto.sim.output <- simulateResiduals(
+	danaus.presence.absence.late.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Rhysomatus presence-absence GLMs
+rhysomatus.presence.absence.early.urb.toronto.sim.output <- simulateResiduals(
+	rhysomatus.presence.absence.early.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+rhysomatus.presence.absence.late.urb.toronto.sim.output <- simulateResiduals(
+	rhysomatus.presence.absence.late.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Aphis presence-absence GLMs
+aphis.presence.absence.early.urb.toronto.sim.output <- simulateResiduals(
+	aphis.presence.absence.early.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+aphis.presence.absence.late.urb.toronto.sim.output <- simulateResiduals(
+	aphis.presence.absence.late.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Myzocallis presence-absence GLMs
+myzocallis.presence.absence.early.urb.toronto.sim.output <- simulateResiduals(
+	myzocallis.presence.absence.early.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+myzocallis.presence.absence.late.urb.toronto.sim.output <- simulateResiduals(
+	myzocallis.presence.absence.late.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Tetraopes presence-absence GLMs
+tetraopes.presence.absence.early.urb.toronto.sim.output <- simulateResiduals(
+	tetraopes.presence.absence.early.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+tetraopes.presence.absence.late.urb.toronto.sim.output <- simulateResiduals(
+	tetraopes.presence.absence.late.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Liriomyza presence-absence GLMs
+liriomyza.presence.absence.early.urb.toronto.sim.output <- simulateResiduals(
+	liriomyza.presence.absence.early.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+liriomyza.presence.absence.late.urb.toronto.sim.output <- simulateResiduals(
+	liriomyza.presence.absence.late.urb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+
+## Visual assessments
+# Danaus presence-absence GLMs
+plot(danaus.presence.absence.early.urb.toronto.sim.output) # Good fit
+plot(danaus.presence.absence.late.urb.toronto.sim.output)  # Good fit
+
+# Rhysomatus presence-absence GLMs
+plot(rhysomatus.presence.absence.early.urb.toronto.sim.output) # Good fit
+plot(rhysomatus.presence.absence.late.urb.toronto.sim.output)  # Good fit
+
+# Aphis presence-absence GLMs
+plot(aphis.presence.absence.early.urb.toronto.sim.output) # Good fit
+plot(aphis.presence.absence.late.urb.toronto.sim.output)  # Good fit
+
+# Myzocallis presence-absence GLMs
+plot(myzocallis.presence.absence.early.urb.toronto.sim.output) # Good fit
+plot(myzocallis.presence.absence.late.urb.toronto.sim.output)  # Good fit
+
+# Tetraopes presence-absence GLMs
+plot(tetraopes.presence.absence.early.urb.toronto.sim.output) # Good fit
+plot(tetraopes.presence.absence.late.urb.toronto.sim.output)  # Good fit
+
+# Liriomyza presence-absence GLMs
+plot(liriomyza.presence.absence.early.urb.toronto.sim.output) # Good fit
+plot(liriomyza.presence.absence.late.urb.toronto.sim.output)  # Good fit
+```
+
+
+```{r Herbivore GLM (Presence-Absence) Fitting, include = FALSE}
+## Danaus
+danaus.presence.absence.early.herb.toronto <- glm(
+	Danaus.early ~ Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+danaus.presence.absence.late.herb.toronto <- glm(
+	Danaus.late ~ Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Rhysomatus
+rhysomatus.presence.absence.late.herb.toronto <- glm(
+	Rhysomatus.late ~ Rhysomatus.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Aphis
+aphis.presence.absence.early.herb.toronto <- glm(
+	Aphis.early ~ Danaus.early + Rhysomatus.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+aphis.presence.absence.late.herb.toronto <- glm(
+	Aphis.late ~ Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Myzocallis
+myzocallis.presence.absence.late.herb.toronto <- glm(
+	Myzocallis.late ~ Myzocallis.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Tetraopes
+tetraopes.presence.absence.early.herb.toronto <- glm(
+	Tetraopes.early ~ Danaus.early + Rhysomatus.early + Aphis.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+tetraopes.presence.absence.late.herb.toronto <- glm(
+	Tetraopes.late ~ Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Liriomyza
+liriomyza.presence.absence.early.herb.toronto <- glm(
+	Liriomyza.early ~ Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+liriomyza.presence.absence.late.herb.toronto <- glm(
+	Liriomyza.late ~ Danaus.early + Rhysomatus.early + Aphis.early + Liriomyza.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+```
+
+```{r Herbivore GLM (Presence-Absence) Diagnostics, include = FALSE}
+## Simulated residuals
+# Danaus presence-absence GLMs
+danaus.presence.absence.early.herb.toronto.sim.output <- simulateResiduals(
+	danaus.presence.absence.early.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+danaus.presence.absence.late.herb.toronto.sim.output <- simulateResiduals(
+	danaus.presence.absence.late.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Rhysomatus presence-absence GLMs
+rhysomatus.presence.absence.late.herb.toronto.sim.output <- simulateResiduals(
+	rhysomatus.presence.absence.late.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Aphis presence-absence GLMs
+aphis.presence.absence.early.herb.toronto.sim.output <- simulateResiduals(
+	aphis.presence.absence.early.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+aphis.presence.absence.late.herb.toronto.sim.output <- simulateResiduals(
+	aphis.presence.absence.late.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Myzocallis presence-absence GLMs
+myzocallis.presence.absence.late.herb.toronto.sim.output <- simulateResiduals(
+	myzocallis.presence.absence.late.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Tetraopes presence-absence GLMs
+tetraopes.presence.absence.early.herb.toronto.sim.output <- simulateResiduals(
+	tetraopes.presence.absence.early.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+tetraopes.presence.absence.late.herb.toronto.sim.output <- simulateResiduals(
+	tetraopes.presence.absence.late.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Liriomyza presence-absence GLMs
+liriomyza.presence.absence.early.herb.toronto.sim.output <- simulateResiduals(
+	liriomyza.presence.absence.early.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+liriomyza.presence.absence.late.herb.toronto.sim.output <- simulateResiduals(
+	liriomyza.presence.absence.late.herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+
+## Visual assessments
+# Danaus presence-absence GLMs
+plot(danaus.presence.absence.early.herb.toronto.sim.output) # Good fit
+plot(danaus.presence.absence.late.herb.toronto.sim.output)  # Good fit
+
+# Rhysomatus presence-absence GLMs
+plot(rhysomatus.presence.absence.late.herb.toronto.sim.output)  # Good fit
+
+# Aphis presence-absence GLMs
+plot(aphis.presence.absence.early.herb.toronto.sim.output) # Good fit
+plot(aphis.presence.absence.late.herb.toronto.sim.output)  # Good fit
+
+# Myzocallis presence-absence GLMs
+plot(myzocallis.presence.absence.late.herb.toronto.sim.output)  # Good fit
+
+# Tetraopes presence-absence GLMs
+plot(tetraopes.presence.absence.early.herb.toronto.sim.output) # Good fit
+plot(tetraopes.presence.absence.late.herb.toronto.sim.output)  # Good fit
+
+# Liriomyza presence-absence GLMs
+plot(liriomyza.presence.absence.early.herb.toronto.sim.output) # Good fit
+plot(liriomyza.presence.absence.late.herb.toronto.sim.output)  # Good fit
+```
+
+
+```{r Urban + Herbivore GLM (Presence-Absence) Fitting, include = FALSE}
+## Danaus
+danaus.presence.absence.early.urb_herb.toronto <- glm(
+	Danaus.early ~ Distance + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+danaus.presence.absence.late.urb_herb.toronto <- glm(
+	Danaus.late ~ Distance + Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Rhysomatus
+rhysomatus.presence.absence.early.urb_herb.toronto <- glm(
+	Rhysomatus.early ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+rhysomatus.presence.absence.late.urb_herb.toronto <- glm(
+	Rhysomatus.late ~ Distance + Rhysomatus.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Aphis
+aphis.presence.absence.early.urb_herb.toronto <- glm(
+	Aphis.early ~ Distance + Danaus.early + Rhysomatus.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+aphis.presence.absence.late.urb_herb.toronto <- glm(
+	Aphis.late ~ Distance + Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Myzocallis
+myzocallis.presence.absence.early.urb_herb.toronto <- glm(
+	Myzocallis.early ~ Distance,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+myzocallis.presence.absence.late.urb_herb.toronto <- glm(
+	Myzocallis.late ~ Distance + Myzocallis.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Tetraopes
+tetraopes.presence.absence.early.urb_herb.toronto <- glm(
+	Tetraopes.early ~ Distance + Danaus.early + Rhysomatus.early + Aphis.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+tetraopes.presence.absence.late.urb_herb.toronto <- glm(
+	Tetraopes.late ~ Distance + Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+
+## Liriomyza
+liriomyza.presence.absence.early.urb_herb.toronto <- glm(
+	Liriomyza.early ~ Distance + Danaus.early + Rhysomatus.early + Aphis.early + Tetraopes.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+liriomyza.presence.absence.late.urb_herb.toronto <- glm(
+	Liriomyza.late ~ Distance + Danaus.early + Rhysomatus.early + Aphis.early + Liriomyza.early + Liriomyza.early,
+  data = final.presence.absence.data[final.presence.absence.data$City == "Toronto", ],
+  family = binomial(link = "logit")
+)
+```
+
+```{r Urban + Herbivore GLM (Presence-Absence) Diagnostics, include = FALSE}
+## Simulated residuals
+# Danaus presence-absence GLMs
+danaus.presence.absence.early.urb_herb.toronto.sim.output <- simulateResiduals(
+	danaus.presence.absence.early.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+danaus.presence.absence.late.urb_herb.toronto.sim.output <- simulateResiduals(
+	danaus.presence.absence.late.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Rhysomatus presence-absence GLMs
+rhysomatus.presence.absence.early.urb_herb.toronto.sim.output <- simulateResiduals(
+	rhysomatus.presence.absence.early.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+rhysomatus.presence.absence.late.urb_herb.toronto.sim.output <- simulateResiduals(
+	rhysomatus.presence.absence.late.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Aphis presence-absence GLMs
+aphis.presence.absence.early.urb_herb.toronto.sim.output <- simulateResiduals(
+	aphis.presence.absence.early.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+aphis.presence.absence.late.urb_herb.toronto.sim.output <- simulateResiduals(
+	aphis.presence.absence.late.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Myzocallis presence-absence GLMs
+myzocallis.presence.absence.early.urb_herb.toronto.sim.output <- simulateResiduals(
+	myzocallis.presence.absence.early.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+myzocallis.presence.absence.late.urb_herb.toronto.sim.output <- simulateResiduals(
+	myzocallis.presence.absence.late.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Tetraopes presence-absence GLMs
+tetraopes.presence.absence.early.urb_herb.toronto.sim.output <- simulateResiduals(
+	tetraopes.presence.absence.early.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+tetraopes.presence.absence.late.urb_herb.toronto.sim.output <- simulateResiduals(
+	tetraopes.presence.absence.late.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+# Liriomyza presence-absence GLMs
+liriomyza.presence.absence.early.urb_herb.toronto.sim.output <- simulateResiduals(
+	liriomyza.presence.absence.early.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+liriomyza.presence.absence.late.urb_herb.toronto.sim.output <- simulateResiduals(
+	liriomyza.presence.absence.late.urb_herb.toronto,
+  n = 500, plot = FALSE, integerResponse = TRUE
+)
+
+
+## Visual assessments
+# Danaus presence-absence GLMs
+plot(danaus.presence.absence.early.urb_herb.toronto.sim.output) # Good fit
+plot(danaus.presence.absence.late.urb_herb.toronto.sim.output)  # Good fit
+
+# Rhysomatus presence-absence GLMs
+plot(rhysomatus.presence.absence.early.urb_herb.toronto.sim.output) # Good fit
+plot(rhysomatus.presence.absence.late.urb_herb.toronto.sim.output)  # Good fit
+
+# Aphis presence-absence GLMs
+plot(aphis.presence.absence.early.urb_herb.toronto.sim.output) # Good fit
+plot(aphis.presence.absence.late.urb_herb.toronto.sim.output)  # Good fit
+
+# Myzocallis presence-absence GLMs
+plot(myzocallis.presence.absence.early.urb_herb.toronto.sim.output) # Good fit
+plot(myzocallis.presence.absence.late.urb_herb.toronto.sim.output)  # Good fit
+
+# Tetraopes presence-absence GLMs
+plot(tetraopes.presence.absence.early.urb_herb.toronto.sim.output) # Good fit
+plot(tetraopes.presence.absence.late.urb_herb.toronto.sim.output)  # Good fit
+
+# Liriomyza presence-absence GLMs
+plot(liriomyza.presence.absence.early.urb_herb.toronto.sim.output) # Good fit
+plot(liriomyza.presence.absence.late.urb_herb.toronto.sim.output)  # Good fit
+```
+
