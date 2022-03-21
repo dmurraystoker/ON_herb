@@ -1,0 +1,784 @@
+---
+title: "Urbanization influences communities of milkweed-specialist herbivorous insects"
+subtitle: "ON_herb pSEM Checking"
+author:
+  - Lindsay S. Miles
+  - Vanessa J. Nahn
+  - David Murray-Stoker
+  - Marc T. J. Johnson
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 4
+    fig_caption: yes
+    latex_engine: xelatex
+always_allow_html: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(results = "hold", fig.pos = "H", fig.align = "center", out.width = "92.5%")
+options(knitr.graphics.error = FALSE)
+kableExtra::usepackage_latex("float")
+```
+
+```{r Load Package for R Markdown, include = FALSE}
+library(kableExtra)
+library(knitr)
+```
+
+```{r Load Packages, include = FALSE}
+## Load packages for data management and analysis
+library(broom)
+library(easystats)
+library(MASS)
+
+## Load the tidyverse
+library(tidyverse)
+```
+
+
+
+
+
+\newpage
+# Background & Questions
+
+We examined how urbanization could disrupt specialized plant-herbivores species interactions, comparing responses by different cities and by traits of the herbivore species. We surveyed arthropod communities in the early and late growing season of the common milkweed (*Asclepias syriaca*) across six cities in southern Ontario (Fig. 1).
+
+We asked the following five questions: **CHECK THESE**
+
+(Q1) Is insect herbivore species diversity, total abundance, and leaf herbivory lower in urban compared to rural habitats?
+(Q2) Does arthropod community composition vary between urban and rural habitats?
+(Q3) Does the response of the herbivore community vary with city size?
+(Q4) Does dispersal ability of insect species influence individual species’ responses to urbanization?
+(Q5) How does urbanization influence interactions among herbivore species? 
+
+Here, **PROVIDE SHORT DESCRIPTION ABOUT PSEM MODEL CHECKING**
+
+
+
+
+\newpage
+# Data Management
+
+
+```{r Load Data, echo = TRUE}
+## Read in data
+raw.SEM.data <- read_csv(
+	"data/toronto_herbivores.csv",
+	col_types = c("ffffnfiiiiiiiiii"),
+	show_col_types = FALSE
+	) %>%
+	unique()
+
+## Extract site info from the raw data
+site.info <- raw.SEM.data %>%
+  select(Population, Season, Distance) %>%
+	unique()
+```
+
+
+
+\newpage
+## Abundance Data
+
+```{r Abundance Data Management: Aggregation, include = FALSE}
+## Sum herbivore abundances from all 5 plants by season and  population
+# Danaus
+danaus.abundances <- raw.SEM.data %>%
+  select(Danaus)
+
+# Rhyssomatus
+rhyssomatus.abundances <- raw.SEM.data %>%
+  select(Rhyssomatus)
+
+# Aphis
+aphis.abundances <- raw.SEM.data %>%
+  select(Aphis_spp)
+
+# Tetraopes
+tetraopes.abundances <- raw.SEM.data %>%
+  select(Tetraopes)
+
+# Liriomyza
+liriomyza.abundances <- raw.SEM.data %>%
+  select(Liriomyza)
+```
+
+\vspace{10pt}
+
+```{r Abundance Data Management: Merging, echo = TRUE, results = "hide"}
+## Select site info and focal herbivores
+abundance.data <- raw.SEM.data %>%
+	select(Population, Season, Distance, Danaus, Rhyssomatus, Aphis_spp, Tetraopes, Liriomyza)
+
+## Subset early data
+early.abundances <- abundance.data %>%
+  filter(Season == "Early") %>%
+  rename(
+    Danaus.early = Danaus, Rhyssomatus.early = Rhyssomatus, Aphis.early = Aphis_spp,
+    Tetraopes.early = Tetraopes, Liriomyza.early = Liriomyza
+  )
+
+## Remove season column
+early.abundances <- early.abundances[, -2]
+
+## Subset late data
+late.abundances <- abundance.data %>%
+  filter(Season == "Late") %>%
+  rename(
+    Danaus.late = Danaus, Rhyssomatus.late = Rhyssomatus, Aphis.late = Aphis_spp,
+    Tetraopes.late = Tetraopes, Liriomyza.late = Liriomyza
+  )
+
+## Remove season column
+late.abundances <- late.abundances[, -2]
+
+## Merge early and late info final abundance dataframe
+final.abundance.data <- early.abundances %>%
+  left_join(late.abundances) %>%
+  na.omit()
+```
+
+
+
+\newpage
+## Presence-Absence Data
+
+```{r Presence-Absence Data: Aggregation, echo = TRUE}
+## Convert abundance matrices to presence-absence matrices
+# Danaus
+danaus.presabs <- danaus.abundances
+danaus.presabs[danaus.presabs > 0] <- 1
+danaus.presabs.binary <- cbind(site.info, danaus.presabs)
+
+# Rhyssomatus
+rhyssomatus.presabs <- rhyssomatus.abundances
+rhyssomatus.presabs[rhyssomatus.presabs > 0] <- 1
+rhyssomatus.presabs.binary <- cbind(site.info, rhyssomatus.presabs)
+
+# Aphis
+aphis.presabs <- aphis.abundances
+aphis.presabs[aphis.presabs > 0] <- 1
+aphis.presabs.binary <- cbind(site.info, aphis.presabs)
+
+# Tetraopes
+tetraopes.presabs <- tetraopes.abundances
+tetraopes.presabs[tetraopes.presabs > 0] <- 1
+tetraopes.presabs.binary <- cbind(site.info, tetraopes.presabs)
+
+# Liriomyza
+liriomyza.presabs <- liriomyza.abundances
+liriomyza.presabs[liriomyza.presabs > 0] <- 1
+liriomyza.presabs.binary <- cbind(site.info, liriomyza.presabs)
+```
+
+\vspace{10pt}
+
+```{r Presence-Absence Data: Merging, echo = TRUE, results = "hide"}
+## Bind herbivore presence-absence together
+herbivore.presabs <- danaus.presabs.binary %>%
+  left_join(rhyssomatus.presabs.binary) %>%
+  left_join(aphis.presabs.binary) %>%
+  left_join(tetraopes.presabs.binary) %>%
+  left_join(liriomyza.presabs.binary)
+
+## Merge site info with presence-absence data
+presence.absence.data <- site.info %>%
+  full_join(herbivore.presabs)
+
+## Subset early data
+early.presence.absence <- presence.absence.data %>%
+  filter(Season == "Early") %>%
+  rename(
+    Danaus.early = Danaus, Rhyssomatus.early = Rhyssomatus,
+    Aphis.early = Aphis_spp, Tetraopes.early = Tetraopes,
+    Liriomyza.early = Liriomyza
+  )
+
+## Remove season column
+early.presence.absence <- early.presence.absence[, -2]
+
+## Subset late data
+late.presence.absence <- presence.absence.data %>%
+  filter(Season == "Late") %>%
+  rename(
+    Danaus.late = Danaus, Rhyssomatus.late = Rhyssomatus,
+    Aphis.late = Aphis_spp, Tetraopes.late = Tetraopes,
+    Liriomyza.late = Liriomyza
+  )
+
+## Remove season column
+late.presence.absence <- late.presence.absence[, -2]
+
+## Merge early and late info final presence-absence dataframe
+final.presence.absence.data <- early.presence.absence %>%
+  left_join(late.presence.absence) %>%
+  na.omit()
+```
+
+
+```{r Save the pSEM Data, include = FALSE}
+save.image("data_analysis/1-analyses/pSEM_data.RData")
+```
+
+
+
+\newpage
+# Model Fitting & Diagnostics
+
+*UPDATE*
+
+Prior to fitting the pSEMs, each individual model was fitted and assumptions were visually inspected using the DHARMa package. Models were fitted for both abundance and presence-absence data. Abundance models were fitted using GLMs with a Poisson distribution and log-link function or negative binomial GLMs to account for overdispersion, while presence-absence models were fitted using GLMs with a binomial distribution and logit-link function.
+
+
+
+\newpage
+## Urbanization (Hypothesized pSEM 1) | Abundance
+
+```{r Urbanization Structural Equation Fitting (Abundance), echo = TRUE}
+## Danaus
+danaus.abundance.early.urb.toronto <- glm.nb(
+	Danaus.early ~ Distance,
+	data = final.abundance.data
+	)
+danaus.abundance.late.urb.toronto <- glm.nb(
+	Danaus.late ~ Distance,
+  data = final.abundance.data
+	)
+
+## Rhyssomatus
+rhyssomatus.abundance.early.urb.toronto <- glm.nb(
+	Rhyssomatus.early ~ Distance,
+  data = final.abundance.data
+	)
+rhyssomatus.abundance.late.urb.toronto <- glm.nb(
+	Rhyssomatus.late ~ Distance,
+  data = final.abundance.data
+	)
+
+## Aphis
+aphis.abundance.early.urb.toronto <- glm.nb(
+	Aphis.early ~ Distance,
+  data = final.abundance.data
+	)
+aphis.abundance.late.urb.toronto <- glm.nb(
+	Aphis.late ~ Distance,
+  data = final.abundance.data
+	)
+
+## Tetraopes
+tetraopes.abundance.early.urb.toronto <- glm.nb(
+	Tetraopes.early ~ Distance,
+  data = final.abundance.data
+	)
+tetraopes.abundance.late.urb.toronto <- glm.nb(
+	Tetraopes.late ~ Distance,
+  data = final.abundance.data
+	)
+
+## Liriomyza
+liriomyza.abundance.early.urb.toronto <- glm.nb(
+	Liriomyza.early ~ Distance,
+  data = final.abundance.data
+	)
+liriomyza.abundance.late.urb.toronto <- glm.nb(
+	Liriomyza.late ~ Distance,
+  data = final.abundance.data
+	)
+```
+
+\vspace{10pt}
+
+```{r Urbanization Structural Equation Diagnostics (Abundance), echo = TRUE, eval = FALSE}
+## Check model assumptions
+# Danaus abundance GLMs
+check_model(danaus.abundance.early.urb.toronto) # Decent fit
+check_model(danaus.abundance.late.urb.toronto) # Decent fit
+
+# Rhyssomatus abundance GLMs
+check_model(rhyssomatus.abundance.early.urb.toronto) # Good fit
+check_model(rhyssomatus.abundance.late.urb.toronto) # Good fit
+
+# Aphis abundance GLMs
+check_model(aphis.abundance.early.urb.toronto) # Good fit
+check_model(aphis.abundance.late.urb.toronto) # Good fit
+
+# Tetraopes abundance GLMs
+check_model(tetraopes.abundance.early.urb.toronto) # Decent fit
+check_model(tetraopes.abundance.late.urb.toronto) # Poor fit
+
+# Liriomyza abundance GLMs
+check_model(liriomyza.abundance.early.urb.toronto) # Good fit
+check_model(liriomyza.abundance.late.urb.toronto) # Good fit
+```
+
+
+
+\newpage
+## Herbivore Interactions (Hypothesized pSEM 2) | Abundance
+
+```{r Herbivore Interactions Structural Equation Fitting (Abundance), echo = TRUE}
+## Danaus
+danaus.abundance.early.herb.toronto <- glm.nb(
+	Danaus.early ~ Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+	data = final.abundance.data
+	)
+danaus.abundance.late.herb.toronto <- glm.nb(
+	Danaus.late ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data
+	)
+
+## Rhyssomatus
+rhyssomatus.abundance.late.herb.toronto <- glm.nb(
+	Rhyssomatus.late ~ Rhyssomatus.early,
+  data = final.abundance.data
+	)
+
+## Aphis
+aphis.abundance.early.herb.toronto <- glm.nb(
+	Aphis.early ~ Danaus.early + Rhyssomatus.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data
+	)
+aphis.abundance.late.herb.toronto <- glm.nb(
+	Aphis.late ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data
+	)
+
+## Tetraopes
+tetraopes.abundance.early.herb.toronto <- glm.nb(
+	Tetraopes.early ~ Danaus.early + Rhyssomatus.early + Aphis.early + Liriomyza.early,
+  data = final.abundance.data
+	)
+tetraopes.abundance.late.herb.toronto <- glm.nb(
+	Tetraopes.late ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data
+	)
+
+## Liriomyza
+liriomyza.abundance.early.herb.toronto <- glm.nb(
+	Liriomyza.early ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early,
+  data = final.abundance.data
+	)
+liriomyza.abundance.late.herb.toronto <- glm.nb(
+	Liriomyza.late ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data
+	)
+```
+
+\vspace{10pt}
+
+```{r Herbivore Interactions Structural Equation Diagnostics (Abundance), echo = TRUE, eval = FALSE}
+## Check model assumptions
+# Danaus abundance GLMs
+check_model(danaus.abundance.early.herb.toronto) # Good fit
+check_model(danaus.abundance.late.herb.toronto) # Good fit
+
+# Rhyssomatus abundance GLMs
+check_model(rhyssomatus.abundance.late.herb.toronto) # Good fit
+
+# Aphis abundance GLMs
+check_model(aphis.abundance.early.herb.toronto) # Good fit
+check_model(aphis.abundance.late.herb.toronto) # Good fit
+
+# Tetraopes abundance GLMs
+check_model(tetraopes.abundance.early.herb.toronto) # Decent fit
+check_model(tetraopes.abundance.late.herb.toronto) # Poor fit
+
+# Liriomyza abundance GLMs
+check_model(liriomyza.abundance.early.herb.toronto) # Good fit
+check_model(liriomyza.abundance.late.herb.toronto) # Good fit
+```
+
+
+
+\newpage
+## Urbanization & Herbivore Interactions (Hypothesized pSEM 3) | Abundance
+
+```{r Urbanization + Herbivore Interactions Structural Equation Fitting (Abundance), echo = TRUE}
+## Danaus
+danaus.abundance.early.urb_herb.toronto <- glm.nb(
+	Danaus.early ~ Distance + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+	data = final.abundance.data
+	)
+danaus.abundance.late.urb_herb.toronto <- glm.nb(
+	Danaus.late ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data
+	)
+
+## Rhyssomatus
+rhyssomatus.abundance.early.urb_herb.toronto <- glm.nb(
+	Rhyssomatus.early ~ Distance,
+  data = final.abundance.data
+	)
+rhyssomatus.abundance.late.urb_herb.toronto <- glm.nb(
+	Rhyssomatus.late ~ Distance + Rhyssomatus.early,
+  data = final.abundance.data
+	)
+
+## Aphis
+aphis.abundance.early.urb_herb.toronto <- glm.nb(
+	Aphis.early ~ Distance + Danaus.early + Rhyssomatus.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data
+	)
+aphis.abundance.late.urb_herb.toronto <- glm.nb(
+	Aphis.late ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data
+	)
+
+## Tetraopes
+tetraopes.abundance.early.urb_herb.toronto <- glm.nb(
+	Tetraopes.early ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Liriomyza.early,
+  data = final.abundance.data
+	)
+tetraopes.abundance.late.urb_herb.toronto <- glm.nb(
+	Tetraopes.late ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data
+	)
+
+## Liriomyza
+liriomyza.abundance.early.urb_herb.toronto <- glm.nb(
+	Liriomyza.early ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early,
+  data = final.abundance.data
+	)
+liriomyza.abundance.late.urb_herb.toronto <- glm.nb(
+	Liriomyza.late ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.abundance.data
+	)
+```
+
+\vspace{10pt}
+
+```{r Urbanization + Herbivore Interactions Structural Equation Diagnostics (Abundance), echo = TRUE}
+## Check model assumptions
+# Danaus abundance GLMs
+check_model(danaus.abundance.early.urb_herb.toronto) # Good fit
+check_model(danaus.abundance.late.urb_herb.toronto) # Good fit
+
+# Rhyssomatus abundance GLMs
+check_model(rhyssomatus.abundance.early.urb_herb.toronto) # Good fit
+check_model(rhyssomatus.abundance.late.urb_herb.toronto) # Good fit
+
+# Aphis abundance GLMs
+check_model(aphis.abundance.early.urb_herb.toronto) # Good fit
+#check_model(aphis.abundance.late.urb_herb.toronto) # Good fit
+
+# Tetraopes abundance GLMs
+check_model(tetraopes.abundance.early.urb_herb.toronto) # Poor fit
+check_model(tetraopes.abundance.late.urb_herb.toronto) # Poor fit
+
+# Liriomyza abundance GLMs
+check_model(liriomyza.abundance.early.urb_herb.toronto) # Good fit
+check_model(liriomyza.abundance.late.urb_herb.toronto) # Good fit
+```
+
+
+
+\newpage
+## Urbanization (Hypothesized pSEM 1) | Presence-Absence
+
+```{r Urbanization Structural Equation Fitting (Presence-Absence), echo = TRUE}
+## Danaus
+danaus.presence.absence.early.urb.toronto <- glm(
+	Danaus.early ~ Distance,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+danaus.presence.absence.late.urb.toronto <- glm(
+	Danaus.late ~ Distance,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+
+## Rhyssomatus
+rhyssomatus.presence.absence.early.urb.toronto <- glm(
+	Rhyssomatus.early ~ Distance,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+rhyssomatus.presence.absence.late.urb.toronto <- glm(
+	Rhyssomatus.late ~ Distance,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+
+## Aphis
+aphis.presence.absence.early.urb.toronto <- glm(
+	Aphis.early ~ Distance,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+aphis.presence.absence.late.urb.toronto <- glm(
+	Aphis.late ~ Distance,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+
+## Tetraopes
+tetraopes.presence.absence.early.urb.toronto <- glm(
+	Tetraopes.early ~ Distance,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+tetraopes.presence.absence.late.urb.toronto <- glm(
+	Tetraopes.late ~ Distance,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+
+## Liriomyza
+liriomyza.presence.absence.early.urb.toronto <- glm(
+	Liriomyza.early ~ Distance,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+liriomyza.presence.absence.late.urb.toronto <- glm(
+	Liriomyza.late ~ Distance,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+```
+
+\vspace{10pt}
+
+```{r Urbanization Structural Equation Diagnostics GLM (Presence-Absence), echo = TRUE}
+## Check model assumptions
+# Danaus presence-absence GLMs
+check_model(danaus.presence.absence.early.urb.toronto) # Decent fit
+check_model(danaus.presence.absence.late.urb.toronto) # Decent fit
+
+# Rhyssomatus presence-absence GLMs
+check_model(rhyssomatus.presence.absence.early.urb.toronto) # Good fit
+check_model(rhyssomatus.presence.absence.late.urb.toronto) # Good fit
+
+# Aphis presence-absence GLMs
+check_model(aphis.presence.absence.early.urb.toronto) # Good fit
+check_model(aphis.presence.absence.late.urb.toronto) # Good fit
+
+# Tetraopes presence-absence GLMs
+check_model(tetraopes.presence.absence.early.urb.toronto) # Poor fit
+check_model(tetraopes.presence.absence.late.urb.toronto) # Poor fit
+
+# Liriomyza presence-absence GLMs
+check_model(liriomyza.presence.absence.early.urb.toronto) # Good fit
+check_model(liriomyza.presence.absence.late.urb.toronto) # Good fit
+```
+
+
+
+\newpage
+## Herbivore Interactions (Hypothesized pSEM 2) | Presence-Absence
+
+```{r Herbivore Interactions Structural Equation Fitting (Presence-Absence), echo = TRUE}
+## Danaus
+danaus.presence.absence.early.herb.toronto <- glm(
+	Danaus.early ~ Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+danaus.presence.absence.late.herb.toronto <- glm(
+	Danaus.late ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+
+## Rhyssomatus
+rhyssomatus.presence.absence.late.herb.toronto <- glm(
+	Rhyssomatus.late ~ Rhyssomatus.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+
+## Aphis
+aphis.presence.absence.early.herb.toronto <- glm(
+	Aphis.early ~ Danaus.early + Rhyssomatus.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+aphis.presence.absence.late.herb.toronto <- glm(
+	Aphis.late ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+
+## Tetraopes
+tetraopes.presence.absence.early.herb.toronto <- glm(
+	Tetraopes.early ~ Danaus.early + Rhyssomatus.early + Aphis.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+tetraopes.presence.absence.late.herb.toronto <- glm(
+	Tetraopes.late ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+
+## Liriomyza
+liriomyza.presence.absence.early.herb.toronto <- glm(
+	Liriomyza.early ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+liriomyza.presence.absence.late.herb.toronto <- glm(
+	Liriomyza.late ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+```
+
+\vspace{10pt}
+
+```{r Herbivore Interactions Structural Equation Diagnostics (Presence-Absence), echo = TRUE, eval = FALSE}
+## Check model assumptions
+# Danaus presence-absence GLMs
+check_model(danaus.presence.absence.early.herb.toronto) # Decent fit
+check_model(danaus.presence.absence.late.herb.toronto) # Good fit
+
+# Rhyssomatus presence-absence GLMs
+check_model(rhyssomatus.presence.absence.late.herb.toronto) # Good fit
+
+# Aphis presence-absence GLMs
+check_model(aphis.presence.absence.early.herb.toronto) # Good fit
+check_model(aphis.presence.absence.late.herb.toronto) # Good fit
+
+# Tetraopes presence-absence GLMs
+check_model(tetraopes.presence.absence.early.herb.toronto) # Poor fit
+check_model(tetraopes.presence.absence.late.herb.toronto) # Poor fit
+
+# Liriomyza presence-absence GLMs
+check_model(liriomyza.presence.absence.early.herb.toronto) # Good fit
+check_model(liriomyza.presence.absence.late.herb.toronto) # Good fit
+```
+
+
+
+\newpage
+## Urbanization & Herbivore Interactions (Hypothesized pSEM3 ) | Presence-Absence
+
+```{r Urbanization + Herbivore Interactions Structural Equation Fitting (Presence-Absence), echo = TRUE}
+## Danaus
+danaus.presence.absence.early.urb_herb.toronto <- glm(
+	Danaus.early ~ Distance + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+danaus.presence.absence.late.urb_herb.toronto <- glm(
+	Danaus.late ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+
+## Rhyssomatus
+rhyssomatus.presence.absence.early.urb_herb.toronto <- glm(
+	Rhyssomatus.early ~ Distance,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+rhyssomatus.presence.absence.late.urb_herb.toronto <- glm(
+	Rhyssomatus.late ~ Distance + Rhyssomatus.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+
+## Aphis
+aphis.presence.absence.early.urb_herb.toronto <- glm(
+	Aphis.early ~ Distance + Danaus.early + Rhyssomatus.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+aphis.presence.absence.late.urb_herb.toronto <- glm(
+	Aphis.late ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+
+## Tetraopes
+tetraopes.presence.absence.early.urb_herb.toronto <- glm(
+	Tetraopes.early ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+tetraopes.presence.absence.late.urb_herb.toronto <- glm(
+	Tetraopes.late ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+
+## Liriomyza
+liriomyza.presence.absence.early.urb_herb.toronto <- glm(
+	Liriomyza.early ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+liriomyza.presence.absence.late.urb_herb.toronto <- glm(
+	Liriomyza.late ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  data = final.presence.absence.data,
+  family = binomial(link = "logit")
+	)
+```
+
+\vspace{10pt}
+
+```{r Urbanization + Herbivore Interactions Structural Equation Diagnostics (Presence-Absence), echo = TRUE, eval = FALSE}
+## Check model assumptions
+# Danaus presence-absence GLMs
+check_model(danaus.presence.absence.early.urb_herb.toronto) # Good fit
+check_model(danaus.presence.absence.late.urb_herb.toronto) # Good fit
+
+# Rhyssomatus presence-absence GLMs
+check_model(rhyssomatus.presence.absence.early.urb_herb.toronto) # Good fit
+check_model(rhyssomatus.presence.absence.late.urb_herb.toronto) # Good fit
+
+# Aphis presence-absence GLMs
+check_model(aphis.presence.absence.early.urb_herb.toronto) # Good fit
+check_model(aphis.presence.absence.late.urb_herb.toronto) # Good fit
+
+# Tetraopes presence-absence GLMs
+check_model(tetraopes.presence.absence.early.urb_herb.toronto) # Decent fit
+check_model(tetraopes.presence.absence.late.urb_herb.toronto) # Poor fit
+
+# Liriomyza presence-absence GLMs
+check_model(liriomyza.presence.absence.early.urb_herb.toronto) # Good fit
+check_model(liriomyza.presence.absence.late.urb_herb.toronto) # Good fit
+```
+
+
+
+
+
+\newpage
+# R Session Information
+
+```{r R Packages, echo = FALSE}
+df_session_packages <- devtools::session_info()$packages %>% 
+  as.data.frame(.) %>% 
+  filter(attached == TRUE) %>% 
+  dplyr::select(loadedversion, date) %>% 
+  rownames_to_column
+
+colnames(df_session_packages) <- c("Package", "Loaded Version", "Date")
+
+kable(
+  df_session_packages, 
+  booktabs = TRUE,
+  caption = "Packages for data management and analyses."
+  ) %>%
+	kable_styling(
+		full_width = FALSE,
+  	latex_options = c("HOLD_position", "striped")
+  	) 
+```
+
+
+
+
+
+
+```{r Save the Workspace, include = FALSE}
+save.image("data_analysis/2-pSEM_checking/pSEM_checking-workspace.RData")
+```
+
+
+
+
