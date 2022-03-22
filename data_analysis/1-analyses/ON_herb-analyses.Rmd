@@ -38,17 +38,16 @@ library(lmerTest)
 library(MASS)
 library(mvabund)
 library(piecewiseSEM)
-library(Rmisc)
 library(vegan)
 
 ## Load the tidyverse
 library(tidyverse)
 
 ## Load the pSEM data (processed in the pSEM Checking script)
-#load("data_analysis/1-analyses/pSEM_data.RData")
+load("data_analysis/1-analyses/pSEM_data.RData")
 
 ## Load the final workspace
-load("data_analysis/1-analyses/ON_herb-analyses-workspace.RData")
+#load("data_analysis/1-analyses/ON_herb-analyses-workspace.RData")
 ```
 
 \newpage
@@ -626,12 +625,40 @@ We fitted the Toronto and 5 Cities `manyglm()` models exactly like the community
 
 
 \newpage
-```{r Disperal Trait Data Managemt, echo = TRUE}
-## Toronto
+```{r Trait Abundance Function, echo = TRUE}
+## Function to calculate trait abundances for each site
+trait_by_population_abundance <- function(j) {
+	## Load required packages
+	require(dplyr)
+	
+	## Set trait matrix
+	trait.matrix <- species.traits
+	
+	## Sequentially calculate abundances for each trait for all sites in the supplied taxa matrix
+	dispersal.1000_km  <- j * trait.matrix[, 2] [match(names(j), trait.matrix$Species)][col(j)]
+	dispersal.100_km   <- j * trait.matrix[, 3] [match(names(j), trait.matrix$Species)][col(j)]
+	dispersal.30_40_km <- j * trait.matrix[, 4] [match(names(j), trait.matrix$Species)][col(j)]
+	dispersal.10_15_km <- j * trait.matrix[, 5] [match(names(j), trait.matrix$Species)][col(j)]
+	dispersal.1_2_km   <- j * trait.matrix[, 6] [match(names(j), trait.matrix$Species)][col(j)]
+	
+	## Set list of traits; remove UID column
+	trait.list <- list(
+		dispersal.1000_km[, -1], dispersal.100_km[, -1], dispersal.30_40_km,
+		dispersal.10_15_km[, -1], dispersal.1_2_km[, -1]
+	)
+	
+	
+	## Sum trait abundances by site
+	trait.abundances.bin.1 <- sapply(trait.list, FUN = rowSums, USE.NAMES = TRUE) %>%
+		as_tibble()
 
-
-## 5 Cities
-
+	## Rename trait columns
+	colnames(trait.abundances.bin.1)[1:5] <- colnames(trait.matrix)[2:6]
+	
+	## Set final trait abundance tibble
+	trait.abundances <- trait.abundances.bin.1 %>%
+		as_tibble()
+}
 ```
 
 \vspace{10pt}
@@ -1368,7 +1395,7 @@ kable(
 
 
 \newpage
-## Abundance, Richness, & Diversity Marginal Means (5 Cities)
+## Marginal Means: Abundance, Richness, & Diversity (5 Cities)
 
 \vspace{18pt}
 
@@ -1815,7 +1842,7 @@ kable(
 
 
 \newpage
-## Leaf Herbivory Marginal Means (Toronto)
+## Marginal Means: Leaf Herbivory (Toronto)
 
 ```{r Toronto Leaf Herbivory ANCOVA Marginal Means, echo = TRUE, results = "hide"}
 ## emmeans
@@ -1863,7 +1890,7 @@ kable(
 
 
 \newpage
-## Leaf Herbivory Marginal Means (5 Cities)
+## Marginal Means: Leaf Herbivory (5 Cities)
 
 ```{r 5 Cities Leaf Herbivory ANOVA Marginal Means: Main Effects, echo = TRUE, results = "hide"}
 ## emmeans
@@ -2103,7 +2130,7 @@ kable(
 
 
 \newpage
-## Abundance, Richness, & Diversity Contrasts (5 Cities)
+## Contrasts: Abundance, Richness, & Diversity (5 Cities)
 
 \vspace{18pt}
 
@@ -2352,7 +2379,7 @@ kable(
 
 
 \newpage
-## Leaf Herbivory Contrasts (Toronto)
+## Contrasts: Leaf Herbivory (Toronto)
 
 ```{r Toronto Leaf Herbivory ANCOVA Contrasts: Season Table, echo = FALSE}
 kable(
@@ -2381,7 +2408,7 @@ kable(
 
 
 \newpage
-## Leaf Herbivory Contrasts (5 Cities)
+## Contrasts: Leaf Herbivory (5 Cities)
 
 ```{r 5 Cities Leaf Herbivory ANOVA Contrasts: City Table, echo = FALSE}
 kable(
