@@ -56,14 +56,14 @@ site.information  <- read_csv(
 ```
 
 
-# Colour Palette
+# Colour Palettes
 
-```{r Set Colour Palette, echo = TRUE}
+```{r Set Colour Palette: superbloom3, echo = TRUE}
 ## Set colour palette (caleco | superbloom3)
 superbloom.continuous <- cal_palette(name = "superbloom3", n = 20, type = "continuous")
 
 ## View the colour palette
-show_col(superbloom.continuous) 
+show_col(superbloom.continuous)
 
 ## Standard palette for the site map
 superbloom.map <- superbloom.continuous[c(1, 5, 7, 9, 15, 20)]
@@ -74,7 +74,11 @@ superbloom.5 <- superbloom.continuous[c(1, 5, 7, 9, 15)]
 # Palette for connecting lines in the 5 cities
 superbloom.10.lines <- c("#E69512", "#E69512", "#CB135E", "#CB135E", "#7B3478", "#7B3478",
 												 "#3A5085", "#3A5085", "#464F63", "#464F63")
+
+## Colours for the Toronto plots
+toronto.2 <- c("#A292C8", "#A5BA92")
 ```
+
 
 
 \newpage
@@ -101,18 +105,12 @@ site.map <- ggmap(ON_big) +
 
 \vspace{10pt}
 
-```{r View the Site Map Figure, echo = FALSE, fig.cap = "Basic site map figure."}
-site.map 
-```
-
-\vspace{10pt}
-
 ```{r Export the Site Map, include = FALSE}
 ## Export the figure
-ggsave("fig_1-site_map.jpg", 
+ggsave("fig_1-basic_site_map.pdf", 
 			 plot = site.map,
-			 device = "jpg",
-			 path = "figures/basic_figures/",
+			 device = "pdf",
+			 path = "figures/",
 			 width = 8,
 			 height = 6,
 			 units = "in",
@@ -126,49 +124,145 @@ ggsave("fig_1-site_map.jpg",
 
 ```{r Set the Toronto ARD Figures, echo = TRUE}
 ## Abundance
-toronto.abundance.figure <- ggscatter(
-	data = toronto.herbivores,
+# Early
+toronto.early.abundance.figure <- ggscatter(
+	data = filter(toronto.herbivores, Season == "Early"),
 	x = "Distance",
 	y = "Summed_Abundance",
-	color = "Season",
+	size = 2,
+	color = "#A292C8",
 	xlab = "Distance",
 	ylab = "Community Abundance",
-	title = "(A) Abundance",
+	title = "(A) Early Season Abundance",
 	ggtheme = theme_pubr(),
 	legend = "right",
-	add = "reg.line",
 	conf.int = TRUE
-)
+) +
+	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
+							method.args = list(family = "quasipoisson"),
+							colour = "#A5BA92", fill = "#A5BA92") +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	rremove("x.text") +
+	rremove("xlab")
+
+# Late
+toronto.late.abundance.figure <- ggscatter(
+	data = filter(toronto.herbivores, Season == "Late"),
+	x = "Distance",
+	y = "Summed_Abundance",
+	size = 2,
+	color = "#A292C8",
+	xlab = "Distance",
+	ylab = "Community Abundance",
+	title = "(B) Late Season Abundance",
+	ggtheme = theme_pubr(),
+	legend = "right",
+	conf.int = TRUE
+) +
+	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
+							method.args = list(family = "quasipoisson"),
+							colour = "#A5BA92", fill = "#A5BA92") +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	rremove("xy.text") +
+	rremove("xlab") +
+	rremove("ylab")
+
 
 ## Richness
-toronto.richness.figure <- ggscatter(
-	data = toronto.herbivores,
+# Early
+toronto.early.richness.figure <- ggscatter(
+	data = filter(toronto.herbivores, Season == "Early"),
 	x = "Distance",
 	y = "Richness",
-	color = "Season",
+	size = 2,
+	color = "#A292C8",
 	xlab = "Distance",
 	ylab = "Species Richness",
-	title = "(B) Richness",
+	title = "(C) Early Season Richness",
 	ggtheme = theme_pubr(),
 	legend = "right",
-	add = "reg.line",
 	conf.int = TRUE
-)
+) +
+	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
+							method.args = list(family = "poisson"),
+							colour = "#A5BA92", fill = "#A5BA92") +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	rremove("x.text") +
+	rremove("xlab")
+
+# Late
+toronto.late.richness.figure <- ggscatter(
+	data = filter(toronto.herbivores, Season == "Late"),
+	x = "Distance",
+	y = "Richness",
+	size = 2,
+	color = "#A292C8",
+	xlab = "Distance",
+	ylab = "Species Richness",
+	title = "(D) Late Season Richness",
+	ggtheme = theme_pubr(),
+	legend = "right",
+	conf.int = TRUE
+) +
+	geom_smooth(method = "glm", formula = y ~ x, se = TRUE,
+							method.args = list(family = "poisson"),
+							colour = "#A5BA92", fill = "#A5BA92") +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	rremove("xy.text") +
+	rremove("xlab") +
+	rremove("ylab")
+
 
 ## Diversity
-toronto.diversity.figure <- ggscatter(
-	data = toronto.herbivores,
+# Early
+toronto.early.diversity.figure <- ggscatter(
+	data = filter(toronto.herbivores, Season == "Early"),
 	x = "Distance",
 	y = "Diversity",
-	color = "Season",
+	size = 2,
+	color = "#A292C8",
 	xlab = "Distance",
 	ylab = "Diversity",
-	title = "(C) Diversity",
+	title = "(E) Early Season Diversity",
 	ggtheme = theme_pubr(),
 	legend = "right",
-	add = "reg.line",
 	conf.int = TRUE
-)
+) +
+	geom_smooth(method = "lm", formula = y ~ x, se = TRUE,
+							colour = "#A5BA92", fill = "#A5BA92") +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20")
+
+# Late
+toronto.late.diversity.figure <- ggscatter(
+	data = filter(toronto.herbivores, Season == "Late"),
+	x = "Distance",
+	y = "Diversity",
+	size = 2,
+	color = "#A292C8",
+	xlab = "Distance",
+	ylab = "Diversity",
+	title = "(F) Late Season Diversity",
+	ggtheme = theme_pubr(),
+	legend = "right",
+	conf.int = TRUE
+) +
+	geom_smooth(method = "lm", formula = y ~ x, se = TRUE,
+							colour = "#A5BA92", fill = "#A5BA92") +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	rremove("y.text") +
+	rremove("ylab")
 ```
 
 \vspace{10pt}
@@ -176,12 +270,13 @@ toronto.diversity.figure <- ggscatter(
 ```{r Arrange the Toronto ARD Panel Figure, echo = TRUE}
 ## Arrange the panel figure
 toronto.ARD.figure <- ggarrange(
-	toronto.abundance.figure, toronto.richness.figure, toronto.diversity.figure,
+	toronto.early.abundance.figure, toronto.late.abundance.figure,
+	toronto.early.richness.figure, toronto.late.richness.figure,
+	toronto.early.diversity.figure, toronto.late.diversity.figure,
 	nrow = 3,
-	ncol = 1,
+	ncol = 2,
 	align = "v",
-	legend = "top",
-	common.legend = TRUE
+	legend = "none"
 )
 ```
 
@@ -189,11 +284,11 @@ toronto.ARD.figure <- ggarrange(
 
 ```{r Export the Toronto ARD Figure, echo = TRUE}
 ## Export the figure
-ggsave("fig_2-toronto_ARD.jpg", 
+ggsave("fig_2-toronto_ARD.pdf", 
 			 plot = toronto.ARD.figure,
-			 device = "jpg",
-			 path = "figures/basic_figures/",
-			 width = 7.5,
+			 device = "pdf",
+			 path = "figures/",
+			 width = 12,
 			 height = 10,
 			 units = "in",
 			 dpi = 900)
@@ -207,61 +302,182 @@ ggsave("fig_2-toronto_ARD.jpg",
 
 ```{r Set the 5 Cities ARD Figures, echo = TRUE}
 ## Abundance
-five.cities.abundance.figure <- ggerrorplot(
-	data = five.cities.herbivores,
+# Early
+five.cities.early.abundance.figure <- ggerrorplot(
+	data = filter(five.cities.herbivores, Season == "Early"),
 	x = "Habitat",
 	y = "Summed_Abundance",
+	size = 1.5,
+	width = 2,
 	desc_stat = "mean_se",
 	color = "City",
+	palette = superbloom.5,
 	xlab = "Habitat",
 	ylab = "Community Abundance",
-	title = "(A) Abundance",
+	title = "(A) Early Season Abundance",
 	ggtheme = theme_pubr()
 	) %>%
 	facet(
-		facet.by = c("Season", "City"),
+		facet.by = "City",
 		nrow = 1,
 		ncol = 5
 	) +
-	stat_summary(aes(group = City), fun = mean, geom = "path")
+	stat_summary(aes(group = City), fun = mean, geom = "path", 
+							 color = superbloom.10.lines) +
+	scale_y_continuous(breaks = c(0, 60, 120, 180)) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	rremove("x.text") +
+	rremove("xlab")
+
+# Late
+five.cities.late.abundance.figure <- ggerrorplot(
+	data = filter(five.cities.herbivores, Season == "Late"),
+	x = "Habitat",
+	y = "Summed_Abundance",
+	size = 1.5,
+	width = 2,
+	desc_stat = "mean_se",
+	color = "City",
+	palette = superbloom.5,
+	xlab = "Habitat",
+	ylab = "Community Abundance",
+	title = "(B) Late Season Abundance",
+	ggtheme = theme_pubr()
+	) %>%
+	facet(
+		facet.by = "City",
+		nrow = 1,
+		ncol = 5
+	) +
+	stat_summary(aes(group = City), fun = mean, geom = "path", 
+							 color = superbloom.10.lines) +
+	scale_y_continuous(breaks = c(0, 1000, 2000, 3000, 4000)) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	rremove("x.text") +
+	rremove("xlab") +
+	rremove("ylab")
+
 
 ## Richness
-five.cities.richness.figure <- ggerrorplot(
-	data = five.cities.herbivores,
+# Early
+five.cities.early.richness.figure <- ggerrorplot(
+	data = filter(five.cities.herbivores, Season == "Early"),
 	x = "Habitat",
 	y = "Richness",
+	size = 1.5,
+	width = 2,
 	desc_stat = "mean_se",
 	color = "City",
+	palette = superbloom.5,
 	xlab = "Habitat",
 	ylab = "Richness",
-	title = "(B) Richness",
+	title = "(C) Early Season Richness",
 	ggtheme = theme_pubr()
 	) %>%
 	facet(
-		facet.by = c("Season", "City"),
+		facet.by = "City",
 		nrow = 1,
 		ncol = 5
 	) +
-	stat_summary(aes(group = City), fun = mean, geom = "path")
+	stat_summary(aes(group = City), fun = mean, geom = "path", 
+							 color = superbloom.10.lines) +
+	scale_y_continuous(breaks = c(1, 2, 3, 4)) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	rremove("x.text") +
+	rremove("xlab")
 
-## Diversity
-five.cities.diversity.figure <- ggerrorplot(
-	data = five.cities.herbivores,
+# Late
+five.cities.late.richness.figure <- ggerrorplot(
+	data = filter(five.cities.herbivores, Season == "Late"),
 	x = "Habitat",
-	y = "Diversity",
+	y = "Richness",
+	size = 1.5,
+	width = 2,
 	desc_stat = "mean_se",
 	color = "City",
+	palette = superbloom.5,
 	xlab = "Habitat",
-	ylab = "Diversity",
-	title = "(C) Diversity",
+	ylab = "Richness",
+	title = "(D) Late Season Richness",
 	ggtheme = theme_pubr()
 	) %>%
 	facet(
-		facet.by = c("Season", "City"),
+		facet.by = "City",
 		nrow = 1,
 		ncol = 5
 	) +
-	stat_summary(aes(group = City), fun = mean, geom = "path")
+	stat_summary(aes(group = City), fun = mean, geom = "path", 
+							 color = superbloom.10.lines) +
+	scale_y_continuous(breaks = c(1, 2, 3, 4)) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	rremove("x.text") +
+	rremove("xlab") +
+	rremove("ylab")
+
+
+## Diversity
+# Early
+five.cities.early.diversity.figure <- ggerrorplot(
+	data = filter(five.cities.herbivores, Season == "Early"),
+	x = "Habitat",
+	y = "Diversity",
+	size = 1.5,
+	width = 2,
+	desc_stat = "mean_se",
+	color = "City",
+	palette = superbloom.5,
+	xlab = "Habitat",
+	ylab = "Diversity",
+	title = "(E) Early Season Diversity",
+	ggtheme = theme_pubr()
+	) %>%
+	facet(
+		facet.by = "City",
+		nrow = 1,
+		ncol = 5
+	) +
+	stat_summary(aes(group = City), fun = mean, geom = "path", 
+							 color = superbloom.10.lines) +
+	scale_y_continuous(breaks = c(0, 0.25, 0.50, 0.75, 1.00, 1.25)) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20")
+
+# Late
+five.cities.late.diversity.figure <- ggerrorplot(
+	data = filter(five.cities.herbivores, Season == "Late"),
+	x = "Habitat",
+	y = "Diversity",
+	size = 1.5,
+	width = 2,
+	desc_stat = "mean_se",
+	color = "City",
+	palette = superbloom.5,
+	xlab = "Habitat",
+	ylab = "Diversity",
+	title = "(F) Late Season Diversity",
+	ggtheme = theme_pubr()
+	) %>%
+	facet(
+		facet.by = "City",
+		nrow = 1,
+		ncol = 5
+	) +
+	stat_summary(aes(group = City), fun = mean, geom = "path", 
+							 color = superbloom.10.lines) +
+	scale_y_continuous(breaks = c(0, 0.5, 1.0)) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	rremove("ylab")
 ```
 
 \vspace{10pt}
@@ -269,9 +485,11 @@ five.cities.diversity.figure <- ggerrorplot(
 ```{r Arrange the 5 Cities ARD Panel Figure, echo = TRUE}
 ## Arrange the panel figure
 five.cities.ARD.figure <- ggarrange(
-	five.cities.abundance.figure, five.cities.richness.figure, five.cities.diversity.figure,
+	five.cities.early.abundance.figure, five.cities.late.abundance.figure,
+	five.cities.early.richness.figure, five.cities.late.richness.figure,
+	five.cities.early.diversity.figure, five.cities.late.diversity.figure,
 	nrow = 3,
-	ncol = 1,
+	ncol = 2,
 	align = "v",
 	legend = "top",
 	common.legend = TRUE
@@ -282,12 +500,12 @@ five.cities.ARD.figure <- ggarrange(
 
 ```{r Export the 5 Cities ARD Figure, echo = TRUE}
 ## Export the figure
-ggsave("fig_3-five.cities_ARD.jpg", 
+ggsave("fig_3-five.cities_ARD.pdf", 
 			 plot = five.cities.ARD.figure,
-			 device = "jpg",
-			 path = "figures/basic_figures/",
-			 width = 7.5,
-			 height = 10,
+			 device = "pdf",
+			 path = "figures/",
+			 width = 15,
+			 height = 12.5,
 			 units = "in",
 			 dpi = 900)
 ```
@@ -304,23 +522,27 @@ toronto.leaf.herbivory.figure <- ggscatter(
 	x = "Distance",
 	y = "Mean_Leaf_Herbivory",
 	color = "Season",
+	palette = toronto.2,
 	xlab = "Distance",
 	ylab = "Mean Leaf Herbivory (%)",
 	ggtheme = theme_pubr(),
 	legend = "right",
 	add = "reg.line",
 	conf.int = TRUE
-)
+) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20")
 ```
 
 \vspace{10pt}
 
 ```{r Export the Toronto Leaf Herbivory Figure, echo = TRUE}
 ## Export the figure
-ggsave("fig_4-toronto_leaf_herbivory.jpg", 
+ggsave("fig_4-toronto_leaf_herbivory.pdf", 
 			 plot = toronto.leaf.herbivory.figure,
-			 device = "jpg",
-			 path = "figures/basic_figures/",
+			 device = "pdf",
+			 path = "figures/",
 			 width = 8,
 			 height = 6,
 			 units = "in",
@@ -334,34 +556,85 @@ ggsave("fig_4-toronto_leaf_herbivory.jpg",
 # Leaf Herbivory | 5 Cities
 
 ```{r Set the 5 Cities Leaf Herbivory Figure, echo = TRUE}
-five.cities.leaf.herbivory.figure <- ggerrorplot(
-	data = five.cities.leaf.damage,
+## Early
+five.cities.early.leaf.herbivory.figure <- ggerrorplot(
+	data = filter(five.cities.leaf.damage, Season == "Early"),
 	x = "Habitat",
 	y = "Mean_Leaf_Herbivory",
+	size = 1.5,
+	width = 2,
 	desc_stat = "mean_se",
 	color = "City",
+	palette = superbloom.5,
 	xlab = "Habitat",
 	ylab = "Mean Leaf Herbivory (%)",
+	title = "(A) Early Season Leaf Herbivory",
 	ggtheme = theme_pubr()
 	) %>%
 	facet(
-		facet.by = c("Season", "City"),
+		facet.by = "City",
 		nrow = 1,
 		ncol = 5
 	) +
-	stat_summary(aes(group = City), fun = mean, geom = "path")
+	stat_summary(aes(group = City), fun = mean, geom = "path", 
+							 color = superbloom.10.lines) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20")
+
+## Late
+five.cities.late.leaf.herbivory.figure <- ggerrorplot(
+	data = filter(five.cities.leaf.damage, Season == "Late"),
+	x = "Habitat",
+	y = "Mean_Leaf_Herbivory",
+	size = 1.5,
+	width = 2,
+	desc_stat = "mean_se",
+	color = "City",
+	palette = superbloom.5,
+	xlab = "Habitat",
+	ylab = "Mean Leaf Herbivory (%)",
+	title = "(B) Late Season Leaf Herbivory",
+	ggtheme = theme_pubr()
+	) %>%
+	facet(
+		facet.by = "City",
+		nrow = 1,
+		ncol = 5
+	) +
+	stat_summary(aes(group = City), fun = mean, geom = "path", 
+							 color = superbloom.10.lines) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	rremove("ylab")
+```
+
+\vspace{10pt}
+
+```{r Arrange the 5 Cities Leaf Herbivory Panel Figure, echo = TRUE}
+## Arrange the panel figure
+five.cities.leaf.herbivory.figure <- ggarrange(
+	five.cities.early.leaf.herbivory.figure,
+	five.cities.late.leaf.herbivory.figure,
+	nrow = 1,
+	ncol = 2,
+	align = "v",
+	legend = "top",
+	common.legend = TRUE
+)
 ```
 
 \vspace{10pt}
 
 ```{r Export the 5 Cities Leaf Herbivory Figure, echo = TRUE}
 ## Export the figure
-ggsave("fig_5-five.cities_leaf_herbivory.jpg", 
+ggsave("fig_5-five.cities_leaf_herbivory.pdf", 
 			 plot = five.cities.leaf.herbivory.figure,
-			 device = "jpg",
-			 path = "figures/basic_figures/",
-			 width = 8,
-			 height = 6,
+			 device = "pdf",
+			 path = "figures/",
+			 width = 15,
+			 height = 7.5,
 			 units = "in",
 			 dpi = 900)
 ```
@@ -388,7 +661,9 @@ toronto.herbivore.abundances.figure <- ggscatter(
 	data = toronto.herbivore.abundances.long,
 	x = "Distance",
 	y = "Measurement",
+	point = FALSE,
 	color = "Herbivore_Species",
+	palette = cal_palette(name = "kelp1", n = 9, type = "continuous"),
 	xlab = "Distance",
 	ylab = "Herbivore Abundance",
 	ggtheme = theme_pubr(),
@@ -399,17 +674,21 @@ toronto.herbivore.abundances.figure <- ggscatter(
 		facet.by = "Season",
 		nrow = 1,
 		ncol = 2
-	)
+	) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	coord_cartesian(ylim = c(0, 22.5))
 ```
 
 \vspace{10pt}
 
 ```{r Export the Toronto Herbivore Abundances Figure, echo = TRUE}
 ## Export the figure
-ggsave("fig_6-toronto_herbivore_abundances.jpg", 
+ggsave("fig_6-toronto_herbivore_abundances.pdf", 
 			 plot = toronto.herbivore.abundances.figure,
-			 device = "jpg",
-			 path = "figures/basic_figures/",
+			 device = "pdf",
+			 path = "figures/",
 			 width = 8,
 			 height = 6,
 			 units = "in",
@@ -440,10 +719,39 @@ five.cities.herbivore.abundances.long.aphids <- five.cities.herbivore.abundances
 \vspace{10pt}
 
 ```{r Set the 5 Cities Herbivore Abundances (No Aphids) Figure, echo = TRUE}
-five.cities.herbivore.abundances.no.aphids.figure <- ggerrorplot(
-	data = five.cities.herbivore.abundances.long.no.aphids,
+## Early (No Aphids)
+five.cities.early.herbivore.abundances.no.aphids.figure <- ggerrorplot(
+	data = filter(five.cities.herbivore.abundances.long.no.aphids, Season == "Early"),
 	x = "Habitat",
 	y = "Measurement",
+	size = 1.5,
+	width = 2,
+	desc_stat = "mean_se",
+	color = "Herbivore_Species",
+	xlab = "Habitat",
+	ylab = "Herbivore Abundance",
+	title = "(A) Early Season Abundances",
+	ggtheme = theme_pubr()
+	) %>%
+	facet(
+		facet.by = "City",
+		nrow = 1,
+		ncol = 5
+	) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	coord_cartesian(ylim = c(0, 18.5)) +
+	rremove("x.text") +
+	rremove("xlab")
+
+## Early (Aphids)
+five.cities.early.herbivore.abundances.aphids.figure <- ggerrorplot(
+	data = filter(five.cities.herbivore.abundances.long.aphids, Season == "Early"),
+	x = "Habitat",
+	y = "Measurement",
+	size = 1.5,
+	width = 2,
 	desc_stat = "mean_se",
 	color = "Herbivore_Species",
 	xlab = "Habitat",
@@ -451,60 +759,99 @@ five.cities.herbivore.abundances.no.aphids.figure <- ggerrorplot(
 	ggtheme = theme_pubr()
 	) %>%
 	facet(
-		facet.by = c("Season", "City"),
+		facet.by = "City",
 		nrow = 1,
 		ncol = 5
-	)
+	) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	coord_cartesian(ylim = c(0, 175))
+
+
+## Late (No Aphids)
+five.cities.late.herbivore.abundances.no.aphids.figure <- ggerrorplot(
+	data = filter(five.cities.herbivore.abundances.long.no.aphids, Season == "Late"),
+	x = "Habitat",
+	y = "Measurement",
+	size = 1.5,
+	width = 2,
+	desc_stat = "mean_se",
+	color = "Herbivore_Species",
+	xlab = "Habitat",
+	ylab = "Herbivore Abundance",
+	title = "(B) Late Season Abundances",
+	ggtheme = theme_pubr()
+	) %>%
+	facet(
+		facet.by = "City",
+		nrow = 1,
+		ncol = 5
+	) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	coord_cartesian(ylim = c(0, 31.5)) +
+	rremove("x.text") +
+	rremove("xlab") +
+	rremove("ylab")
+
+## Late (Aphids)
+five.cities.late.herbivore.abundances.aphids.figure <- ggerrorplot(
+	data = filter(five.cities.herbivore.abundances.long.aphids, Season == "Late"),
+	x = "Habitat",
+	y = "Measurement",
+	size = 1.5,
+	width = 2,
+	desc_stat = "mean_se",
+	color = "Herbivore_Species",
+	xlab = "Habitat",
+	ylab = "Herbivore Abundance",
+	ggtheme = theme_pubr()
+	) %>%
+	facet(
+		facet.by = "City",
+		nrow = 1,
+		ncol = 5
+	) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	coord_cartesian(ylim = c(0, 2500)) +
+	rremove("ylab")
+```
+
+\vspace{10pt}
+
+```{r Arrange the 5 Cities Herbivore Abundances Panel Figure, echo = TRUE}
+## Arrange the panel figure
+five.cities.herbivore.abundances.figure <- ggarrange(
+	five.cities.early.herbivore.abundances.no.aphids.figure,
+	five.cities.late.herbivore.abundances.no.aphids.figure,
+	five.cities.early.herbivore.abundances.aphids.figure,
+	five.cities.late.herbivore.abundances.aphids.figure,
+	nrow = 2,
+	ncol = 2,
+	align = "hv",
+	legend = "top",
+	common.legend = TRUE
+)
 ```
 
 \vspace{10pt}
 
 ```{r Export the 5 Cities Herbivore Abundances (No Aphids) Figure, echo = TRUE}
 ## Export the figure
-ggsave("fig_7a-five.cities_herbivore_abundances_no_aphids.jpg", 
-			 plot = five.cities.herbivore.abundances.no.aphids.figure,
-			 device = "jpg",
-			 path = "figures/basic_figures/",
-			 width = 10,
-			 height = 7.5,
+ggsave("fig_7-five.cities_herbivore_abundances.pdf", 
+			 plot = five.cities.herbivore.abundances.figure,
+			 device = "pdf",
+			 path = "figures/",
+			 width = 15,
+			 height = 10,
 			 units = "in",
 			 dpi = 900)
 ```
 
-
-## Aphids
-
-```{r Set the 5 Cities Herbivore Abundances (Aphids) Figure, echo = TRUE}
-five.cities.herbivore.abundances.aphids.figure <- ggerrorplot(
-	data = five.cities.herbivore.abundances.long.aphids,
-	x = "Habitat",
-	y = "Measurement",
-	desc_stat = "mean_se",
-	color = "Herbivore_Species",
-	xlab = "Habitat",
-	ylab = "Herbivore Abundance",
-	ggtheme = theme_pubr()
-	) %>%
-	facet(
-		facet.by = c("Season", "City"),
-		nrow = 1,
-		ncol = 5
-	)
-```
-
-\vspace{10pt}
-
-```{r Export the 5 Cities Herbivore Abundances (Aphids) Figure, echo = TRUE}
-## Export the figure
-ggsave("fig_7b-five.cities_herbivore_abundances_aphids.jpg", 
-			 plot = five.cities.herbivore.abundances.aphids.figure,
-			 device = "jpg",
-			 path = "figures/basic_figures/",
-			 width = 8,
-			 height = 6,
-			 units = "in",
-			 dpi = 900)
-```
 
 
 
@@ -527,7 +874,9 @@ toronto.dispersal.traits.figure <- ggscatter(
 	data = toronto.dispersal.traits.long,
 	x = "Distance",
 	y = "Measurement",
+	point = FALSE,
 	color = "Dispersal_Trait",
+	palette = cal_palette(name = "superbloom1", n = 5, type = "continuous"),
 	xlab = "Distance",
 	ylab = "Herbivore Abundance",
 	ggtheme = theme_pubr(),
@@ -538,17 +887,18 @@ toronto.dispersal.traits.figure <- ggscatter(
 		facet.by = "Season",
 		nrow = 1,
 		ncol = 2
-	)
+	) +
+	coord_cartesian(ylim = c(0, 25))
 ```
 
 \vspace{10pt}
 
 ```{r Export the Toronto Dispersal Traits Figure, echo = TRUE}
 ## Export the figure
-ggsave("fig_8-toronto_dispersal_traits.jpg", 
+ggsave("fig_S1-toronto_dispersal_traits.pdf", 
 			 plot = toronto.dispersal.traits.figure,
-			 device = "jpg",
-			 path = "figures/basic_figures/",
+			 device = "pdf",
+			 path = "figures/",
 			 width = 8,
 			 height = 6,
 			 units = "in",
@@ -568,83 +918,101 @@ five.cities.dispersal.traits.wide <- five.cities.herbivores %>%
 	select(City, Habitat, Season) %>%
 	bind_cols(five.cities.trait.abundances)
 
-five.cities.dispersal.traits.long.no.aphids <- five.cities.dispersal.traits.wide  %>%
-	gather(Dispersal_Trait, Measurement, X1000_km:X1.2_km, factor_key = TRUE) %>%
-	filter(Dispersal_Trait != "X100_km")
-
-five.cities.dispersal.traits.long.aphids <- five.cities.dispersal.traits.wide  %>%
-	gather(Dispersal_Trait, Measurement, X1000_km:X1.2_km, factor_key = TRUE) %>%
-	filter(Dispersal_Trait == "X100_km")
+five.cities.dispersal.traits.long <- five.cities.dispersal.traits.wide  %>%
+	gather(Dispersal_Trait, Measurement, X1000_km:X1.2_km, factor_key = TRUE)
 ```
 
 \vspace{10pt}
 
-```{r Set the 5 Cities Dispersal Traits (No Aphids) Figure, echo = TRUE}
-five.cities.dispersal.traits.no.aphids.figure <- ggerrorplot(
-	data = five.cities.dispersal.traits.long.no.aphids,
+```{r Set the 5 Cities Dispersal Trait Abundances (No Aphids) Figure, echo = TRUE}
+## Early (No Aphids)
+five.cities.early.dispersal.traits.figure <- ggerrorplot(
+	data = filter(five.cities.dispersal.traits.long, Season == "Early"),
 	x = "Habitat",
 	y = "Measurement",
+	size = 1.5,
+	width = 2,
 	desc_stat = "mean_se",
 	color = "Dispersal_Trait",
+	palette = cal_palette(name = "superbloom1", n = 5, type = "continuous"),
 	xlab = "Habitat",
-	ylab = "Herbivore Abundance",
+	ylab = "Dispersal Trait Abundance",
+	title = "(A) Early Season Abundances",
 	ggtheme = theme_pubr()
 	) %>%
 	facet(
-		facet.by = c("Season", "City"),
+		facet.by = "City",
 		nrow = 1,
 		ncol = 5
-	)
+	) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	coord_cartesian(ylim = c(0, 100))
+	rremove("x.text") +
+	rremove("xlab")
+
+## Late 
+five.cities.late.dispersal.traits.figure <- ggerrorplot(
+	data = filter(five.cities.dispersal.traits.long, Season == "Late"),
+	x = "Habitat",
+	y = "Measurement",
+	size = 1.5,
+	width = 2,
+	desc_stat = "mean_se",
+	color = "Dispersal_Trait",
+	palette = cal_palette(name = "superbloom1", n = 5, type = "continuous"),
+	xlab = "Habitat",
+	ylab = "Dispersal Trait Abundance",
+	title = "(B) Late Season Abundances",
+	ggtheme = theme_pubr()
+	) %>%
+	facet(
+		facet.by = "City",
+		nrow = 1,
+		ncol = 5
+	) +
+	font("xlab", size = 18, color = "gray0") +
+	font("ylab", size = 18, color = "gray0") +
+	font("xy.text", size = 14, color = "gray20") +
+	coord_cartesian(ylim = c(0, 2250)) +
+	rremove("ylab")
 ```
 
 \vspace{10pt}
 
-```{r Export the 5 Cities Dispersal Traits (No Aphids) Figure, echo = TRUE}
+```{r Arrange the 5 Cities Dispersal Traits Panel Figure, echo = TRUE}
+## Arrange the panel figure
+five.cities.dispersal.traits.figure <- ggarrange(
+	five.cities.early.dispersal.traits.figure,
+	five.cities.late.dispersal.traits.figure,
+	nrow = 1,
+	ncol = 2,
+	align = "hv",
+	legend = "top",
+	common.legend = TRUE
+)
+```
+
+\vspace{10pt}
+
+```{r Export the 5 Cities Dispersal Trait Abundances (No Aphids) Figure, echo = TRUE}
 ## Export the figure
-ggsave("fig_9a-five.cities_dispersal_traits_no_aphids.jpg", 
-			 plot = five.cities.dispersal.traits.no.aphids.figure,
-			 device = "jpg",
-			 path = "figures/basic_figures/",
-			 width = 10,
-			 height = 7.5,
+ggsave("fig_S2-five.cities_dispersal.traits_abundances.pdf", 
+			 plot = five.cities.dispersal.traits.figure,
+			 device = "pdf",
+			 path = "figures/",
+			 width = 15,
+			 height = 10,
 			 units = "in",
 			 dpi = 900)
 ```
 
 
-## Aphids
 
-```{r Set the 5 Cities Dispersal Traits (Aphids) Figure, echo = TRUE}
-five.cities.dispersal.traits.aphids.figure <- ggerrorplot(
-	data = five.cities.dispersal.traits.long.aphids,
-	x = "Habitat",
-	y = "Measurement",
-	desc_stat = "mean_se",
-	color = "Dispersal_Trait",
-	xlab = "Habitat",
-	ylab = "Herbivore Abundance",
-	ggtheme = theme_pubr()
-	) %>%
-	facet(
-		facet.by = c("Season", "City"),
-		nrow = 1,
-		ncol = 5
-	)
-```
 
-\vspace{10pt}
 
-```{r Export the 5 Cities Dispersal Traits (Aphids) Figure, echo = TRUE}
-## Export the figure
-ggsave("fig_9b-five.cities_dispersal_traits_aphids.jpg", 
-			 plot = five.cities.dispersal.traits.aphids.figure,
-			 device = "jpg",
-			 path = "figures/basic_figures/",
-			 width = 8,
-			 height = 6,
-			 units = "in",
-			 dpi = 900)
-```
+
 
 
 
