@@ -850,7 +850,7 @@ References:
 | Tetraopes   | 1          | 0          | 1          | 1          | 1          |
 | Liriomyza   | 1          | 0          | 1          | 1          | 1          |
 
-Table: Matrix of causal pathways from early (columns) to late (rows) taxa, with 1 indicating a causal pathway between the two taxa from early to late period. Correlations within trial periods will be fitted for herbivores as a measure of potential competition or antagonism.
+Table: Matrix of causal pathways from early (columns) to late (rows) taxa, with 1 indicating a causal pathway between the two taxa from early to late period. Correlations within trial periods were fitted for herbivores as a measure of potential competition or antagonism.
 
 
 

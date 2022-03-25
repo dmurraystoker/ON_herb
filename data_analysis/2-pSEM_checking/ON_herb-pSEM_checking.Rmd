@@ -95,7 +95,7 @@ rhyssomatus.abundances <- raw.SEM.data %>%
 
 # Aphis
 aphis.abundances <- raw.SEM.data %>%
-  select(Aphis_spp)
+  select(Aphis)
 
 # Tetraopes
 tetraopes.abundances <- raw.SEM.data %>%
@@ -111,13 +111,13 @@ liriomyza.abundances <- raw.SEM.data %>%
 ```{r Abundance Data Management: Merging, echo = TRUE, results = "hide"}
 ## Select site info and focal herbivores
 abundance.data <- raw.SEM.data %>%
-	select(Population, Season, Distance, Danaus, Rhyssomatus, Aphis_spp, Tetraopes, Liriomyza)
+	select(Population, Season, Distance, Danaus, Rhyssomatus, Aphis, Tetraopes, Liriomyza)
 
 ## Subset early data
 early.abundances <- abundance.data %>%
   filter(Season == "Early") %>%
   rename(
-    Danaus.early = Danaus, Rhyssomatus.early = Rhyssomatus, Aphis.early = Aphis_spp,
+    Danaus.early = Danaus, Rhyssomatus.early = Rhyssomatus, Aphis.early = Aphis,
     Tetraopes.early = Tetraopes, Liriomyza.early = Liriomyza
   )
 
@@ -128,7 +128,7 @@ early.abundances <- early.abundances[, -2]
 late.abundances <- abundance.data %>%
   filter(Season == "Late") %>%
   rename(
-    Danaus.late = Danaus, Rhyssomatus.late = Rhyssomatus, Aphis.late = Aphis_spp,
+    Danaus.late = Danaus, Rhyssomatus.late = Rhyssomatus, Aphis.late = Aphis,
     Tetraopes.late = Tetraopes, Liriomyza.late = Liriomyza
   )
 
@@ -193,7 +193,7 @@ early.presence.absence <- presence.absence.data %>%
   filter(Season == "Early") %>%
   rename(
     Danaus.early = Danaus, Rhyssomatus.early = Rhyssomatus,
-    Aphis.early = Aphis_spp, Tetraopes.early = Tetraopes,
+    Aphis.early = Aphis, Tetraopes.early = Tetraopes,
     Liriomyza.early = Liriomyza
   )
 
@@ -205,7 +205,7 @@ late.presence.absence <- presence.absence.data %>%
   filter(Season == "Late") %>%
   rename(
     Danaus.late = Danaus, Rhyssomatus.late = Rhyssomatus,
-    Aphis.late = Aphis_spp, Tetraopes.late = Tetraopes,
+    Aphis.late = Aphis, Tetraopes.late = Tetraopes,
     Liriomyza.late = Liriomyza
   )
 
