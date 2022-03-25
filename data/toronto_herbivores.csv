@@ -1,4 +1,4 @@
-UID,Population,City,Habitat,Distance,Season,Danaus,Rhyssomatus,Aphis_spp,Myzocallis,Euchaetes,Lygaeus,Oncopeltus,Tetraopes,Liriomyza,Summed_Abundance
+UID,Population,City,Habitat,Distance,Season,Danaus,Rhyssomatus,Aphis,Myzocallis,Euchaetes,Lygaeus,Oncopeltus,Tetraopes,Liriomyza,Summed_Abundance
 AS001,1,Toronto,Urban,15.89377953,Early,1,0,0,0,0,0,0,0,21,22
 AS002,2,Toronto,Urban,15.51,Early,2,0,0,0,7,0,0,3,7,19
 AS004,3,Toronto,Urban,16.03360391,Early,2,0,0,0,0,0,0,0,5,7

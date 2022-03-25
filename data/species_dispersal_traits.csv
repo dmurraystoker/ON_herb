@@ -1,7 +1,7 @@
 Species,1000_km,100_km,30-40_km,10-15_km,1-2_km
 Danaus,1,0,0,0,0
 Rhyssomatus,0,0,0,0,1
-Aphis_spp,0,1,0,0,0
+Aphis,0,1,0,0,0
 Myzocallis,0,1,0,0,0
 Euchaetes,1,0,0,0,0
 Lygaeus,0,0,1,0,0
