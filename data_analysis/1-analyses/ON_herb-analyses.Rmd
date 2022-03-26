@@ -68,11 +68,6 @@ We asked the following five questions:
 (Q5) How does urbanization influence herbivore species interactions? 
 
 
-```{r Site Map, include = FALSE, fig.cap = "Map of sampling locations, with sites coloured by city. Urban sites are indicated by circles and rural sites by triangles. Toronto was sampled along an urbanization gradient while the 5 Cities were sampled using urban-rural pairs."}
-knitr::include_graphics(paste0(getwd(), "/figures/fig_1-site_map.jpg"))
-```
-
-
 
 
 \newpage
@@ -171,7 +166,18 @@ toronto.abundance.ANCOVA <- glm.nb(
 
 \vspace{10pt}
 
-```{r Toronto Abundance ANCOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the Toronto abundance ANCOVA. The model had slight but acceptable over-dispersion (dispersion statistic = 1.25)"}
+```{r Toronto Abundance ANCOVA: Dispersion Statistic, echo = TRUE, eval = FALSE}
+## Toronto abundance ANCOVA dispersion statistic
+E2 <- resid(toronto.abundance.ANCOVA, type = "pearson")
+N  <- nrow(toronto.herbivores)
+p  <- length(coef(toronto.abundance.ANCOVA))
+sum(E2^2) / (N - p)
+# Dispersion statistic = 1.250
+```
+
+\vspace{10pt}
+
+```{r Toronto Abundance ANCOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the Toronto abundance ANCOVA. The model had slight but acceptable over-dispersion (dispersion statistic = 1.250)"}
 check_model(toronto.abundance.ANCOVA)
 ```
 
@@ -202,7 +208,15 @@ toronto.richness.ANCOVA <- glm(
 
 \vspace{10pt}
 
-```{r Toronto Richness ANCOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the Toronto richness ANCOVA. The model has acceptable dispersion (dispersion statistics = 0.44)."}
+```{r Toronto Richness ANCOVA: Dispersion Statistic, echo = TRUE, eval = FALSE}
+## Toronto richness ANCOVA dispersion statistic
+check_overdispersion(toronto.richness.ANCOVA)
+# Dispersion statistic = 0.437
+```
+
+\vspace{10pt}
+
+```{r Toronto Richness ANCOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the Toronto richness ANCOVA. The model has acceptable dispersion (dispersion statistics = 0.437)."}
 check_model(toronto.richness.ANCOVA)
 ```
 
@@ -265,7 +279,18 @@ five.cities.abundance.ANOVA <- glm.nb(
 
 \vspace{10pt}
 
-```{r 5 Cities Abundance ANOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the 5 Cities abundance ANOVA. The model has good dispersion (dispersion statistic = 0.93)."}
+```{r 5 Cities Abundance ANCOVA: Dispersion Statistic, echo = TRUE, eval = FALSE}
+## 5 Cities abundance ANOVA dispersion statistic
+E2 <- resid(five.cities.abundance.ANOVA, type = "pearson")
+N  <- nrow(five.cities.herbivores)
+p  <- length(coef(five.cities.abundance.ANOVA)) + 1
+sum(E2^2) / (N - p)
+# Dispersion statistic = 0.959
+```
+
+\vspace{10pt}
+
+```{r 5 Cities Abundance ANOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the 5 Cities abundance ANOVA. The model has good dispersion (dispersion statistic = 0.959)."}
 check_model(five.cities.abundance.ANOVA)
 ```
 
@@ -350,13 +375,13 @@ kable(
 
 We analyzed the effects of urbanization on leaf herbivory using linear mixed-effects models. The Toronto model was fitted as:
 
-$$ Mean\ Leaf\ Herbivory\ = Distance + Season + Distance:Season + (Season\ |\ Population) +$$
+$$ Mean\ Leaf\ Herbivory\ = Distance + Season + Distance:Season + (Season\ |\ Population)$$
 
-where distance, season, and the two-way interaction were fitted as fixed effects, and population was fitted as a random intercept with a random slope for each season. The Toronto model with a random slope and intercept had better fit compared to the model with only a random intercept (random slope and intercept: $AIC_c = 2094.771$, $R^2_{marginal} = 0.201$, $R^2_{conditional} = 0.419$; random intercept only: $AIC_c = 2108.466$, $R^2_{marginal} = 0.203$, $R^2_{conditional} = 0.364$). The 5 Cities model was fitted as:
+where distance, season, and the two-way interaction were fitted as fixed effects, and population was fitted as a random intercept with a random slope for each season. The Toronto model with a random slope and intercept had better fit compared to the model with only a random intercept (random slope and intercept: $AIC_c = 2094.771$, $R^2_{Marginal} = 0.201$, $R^2_{Conditional} = 0.419$; random intercept only: $AIC_c = 2108.466$, $R^2_{Marginal} = 0.203$, $R^2_{Conditional} = 0.364$). The 5 Cities model was fitted as:
 
 $$ Mean\ Leaf\ Herbivory\ =  City\ [C] + Habitat\ [H] + Season [S] + C:H + C:S + H:S + C:H:S + (1\ |\ Population)$$
 
-where city, habitat, season, and all two- and three-way interactions were fitted as fixed effects and population was fitted as a random intercept. The Toronto model with a random slope and intercept had better fit compared to the model with only a random intercept (random slope and intercept: $AIC_c = 629.515$, $R^2_{marginal} = 0.645$, $R^2_{conditional} = 0.787$; random intercept only: $AIC_c = 660.430$, $R^2_{marginal} = 0.639$, $R^2_{conditional} = 0.756$), but the 5 Cities random slope and intercept model failed to converge Therefore. we fitted the 5 Cities model with just a random intercept for population.
+where city, habitat, season, and all two- and three-way interactions were fitted as fixed effects and population was fitted as a random intercept. We attempted to fit a model for the 5 Cities with a random intercept for population and a random slope for season, but the model failed to converge; therefore, we fitted the 5 Cities model with just a random intercept for population.
 
 Both the Toronto and 5 Cities leaf herbivory models were fitted using `lmer()`. All model assumptions were inspected graphically using `check_model()`, and we applied a square-root transformation to mean leaf herbivory for both the Toronto and 5 Cities models to better meet model assumptions. Influence of main effects and interactions was determined with Type III sums-of-squares, with degrees of freedom estimated using the Kenward-Roger method.
 
@@ -447,7 +472,7 @@ kable(
 \newpage
 # Herbivore Communities & Urbanization
 
-We evaluated whether community composition and individual herbivore species varied with urbanization by using multivariate generalized linear models. In this approach, separate GLMs with shared predictor variables are fitted using `manyglm()` and then resampling methods are used to test which variables or factors are associated with the multivariate abundances. With this approach, it is possible to answer: (1) do communities vary in composition with urbanization and (2) which herbivore species are influenced by urbanization?
+We evaluated whether community composition and individual herbivore species varied with urbanization by using multivariate generalized linear models. In this approach, separate GLMs with shared predictor variables are fitted using `manyglm()` and then resampling methods are used to test which variables or factors are associated with the multivariate abundances. With this approach, it is possible to determine if community composition varies with urbanization and also identify which, if any, herbivore species respond to urbanization.
 
 We first created a separate site-by-species abundance matrix for the Toronto and 5 Cities datasets, and these matrices were the response in the resulting `manyglm()` models. We fitted the Toronto model as:
 
@@ -467,7 +492,7 @@ References:
 
 > Warton, D. I., et al. 2012, Distance-based multivariate analyses confound location and dispersion effects. Methods in Ecology and Evolution 3: 89-101.
 
-
+\vspace{10pt}
 
 ```{r Herbivore Communities: Data Management, echo = TRUE}
 ## Set the Toronto community matrix
@@ -479,6 +504,7 @@ five.cities.community.matrix <- five.cities.herbivores[, 7:15] %>%
 	as.data.frame()
 ```
 
+\vspace{10pt}
 
 \newpage
 ## Toronto
@@ -619,7 +645,7 @@ kable(
 \newpage
 # Dispersal-Urbanization Relationships
 
-We evaluated whether abundances of different dispersal traits varied with urbanization using a similar approach to the multivariate GLMs for community composition and herbivore species. Instead of supplying a site-by-species abundance matrix as the response, we calculated the abundances of each trait for each site and provided a site-by-trait-abundance matrix as the response. With this modification, we can test (1) whether dispersal trait abundances vary with urbanization and (2) which specific dispersal traits are influenced by urbanization?
+We evaluated whether abundances of different dispersal traits varied with urbanization using a similar approach to the multivariate GLMs for community composition and herbivore species. Instead of supplying a site-by-species abundance matrix as the response, we calculated the abundances of each trait for each site and provided a site-by-trait-abundance matrix as the response. This approach allows us to identify if dispersal ability is associated with urbanization and how the abundance of dispersal traits varies with urbanization.
 
 We fitted the Toronto and 5 Cities `manyglm()` models exactly like the community composition and herbivore species models, except for the site-by-trait-abundance matrix as the response. Both models were fitted using GLMs with a negative-binomial error distribution, and model assumptions were evaluated graphically. The influence of main effects and interactions in the model was determined using likelihood ratio tests and resampling, resulting in a multivariate test for the overall abundance matrix and univariate tests for each herbivore species. We used 999 resampling iterations, with P-values adjusted for multiple testing through an automated step-down resampling procedure.
 
@@ -823,7 +849,7 @@ We used pSEMs to draw causal inference on the interactions between urbanization,
 
 Briefly, pSEM structures were as follows: (1) the urbanization pSEM only fitted distance from the city center as a predictor on each herbivore; (2) the species interaction pSEM only fitted relationships between herbivores without any accounting for effects of urbanization; and (3) the urbanization and species interactions pSEM integrated distance from the city center with species interactions. For the pSEMs incorporating species interactions, we fitted all pairwise correlations between the focal herbivores within the same season and we also fitted causal pathways between the early and late season for the same species.
 
-We used the same pSEM model structures to fit abundance and presence-absence data. Abundance models were fitted using GLMs with a Poisson distribution and a log-link function or negative binomial GLM to account for overdispersion. Presence-absence models were fitted using GLMs with a binomial distribution and logit-link function. Prior to fitting the pSEMs, each individual model within the structured set was fitted and assumptions were visually inspected using `check_model()`. Models fitted to presence-absence data better met assumptions and were therefore reported as the main results; models fitted to abundance data are reported in the appendix and have nearly identical ecological interpretation as the presence-absence models. Overall fit of the Toronto pSEMs were examined using Shipley’s test of directed separation, which determines if there are missing pathways between unconnected variables (Shipley, 2009). Hypothesized pSEMs were considered consistent with the data when the sum of all conditional independence claims in the pSEM, measured as Fisher’s C statistic, was not statistically significant (Lefcheck, 2015). After confirming adequate model fit, we compared each pSEM using Akaike information criterion with sample size correction (AIC~c~), in which the pSEM with the lowest AI~c~C value was the best fitting model. Results of the pSEMs were reported as standardized path coefficients, which show the direction and magnitude of causal relationships between variables and allow for comparison of relationship strengths within the pSEM (Wright, 1934; Grace, 2006; Lefcheck, 2015).
+We used the same pSEM model structures to fit abundance and presence-absence data. Abundance models were fitted using GLMs with a Poisson distribution and a log-link function or negative binomial GLM to account for overdispersion. Presence-absence models were fitted using GLMs with a binomial distribution and logit-link function. Prior to fitting the pSEMs, each individual model within the structured set was fitted and assumptions were visually inspected using `check_model()`. Models fitted to presence-absence data better met assumptions and were therefore reported as the main results; models fitted to abundance data are reported in the appendix and have nearly identical ecological interpretation as the presence-absence models. Overall fit of the Toronto pSEMs were examined using Shipley’s test of directed separation, which determines if there are missing pathways between unconnected variables (Shipley, 2009). Hypothesized pSEMs were considered consistent with the data when the sum of all conditional independence claims in the pSEM, measured as Fisher’s C statistic, was not statistically significant (Lefcheck, 2015). After confirming adequate model fit, we compared each pSEM using Akaike information criterion with sample size correction (AIC~c~), in which the pSEM with the lowest AI~c~C value was the best fitting model. Results of the pSEMs were reported as standardized path coefficients, which show the direction and magnitude of causal relationships between variables and allow for comparison of relationship strengths within the pSEM (Wright, 1934; Grace, 2006; Lefcheck, 2015). Piecewise SEMs fitted with abundance data either had poor model fit or failed to converge; therefore, presence-absence models were reported and interpreted by default.
 
 References:
 
@@ -855,7 +881,7 @@ Table: Matrix of causal pathways from early (columns) to late (rows) taxa, with 
 
 
 \newpage
-## Urbanization (pSEM 1) | Presence-Absence
+## Urbanization (pSEM 1)
 
 ```{r Urbanization pSEM Specification: Presence-Absence, echo = TRUE}
 ## Specify the urbanization pSEM
@@ -968,14 +994,15 @@ kable(
 
 
 \newpage
-## Herbivore Interactions (Hypothesized pSEM 2) | Presence-Absence
+## Herbivore Interactions (Hypothesized pSEM 2)
 
 ```{r Herbivore Interactions pSEM Specification: Presence-Absence, echo = TRUE}
 ## Specify the herbivore interactions pSEM
 herbivore.pSEM.presence.absence <- psem(
   ## Danaus
   danaus.presence.absence.late.herb.toronto <- glm(
-  	Danaus.late ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  	Danaus.late ~ Danaus.early + Rhyssomatus.early + Aphis.early
+  	              + Tetraopes.early + Liriomyza.early,
     data = final.presence.absence.data,
     family = binomial(link = "logit")
   	),
@@ -1003,7 +1030,8 @@ herbivore.pSEM.presence.absence <- psem(
 
   ## Aphis
   aphis.presence.absence.late.herb.toronto <- glm(
-  	Aphis.late ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  	Aphis.late ~ Danaus.early + Rhyssomatus.early + Aphis.early
+  	             + Tetraopes.early + Liriomyza.early,
     data = final.presence.absence.data,
     family = binomial(link = "logit")
   	),
@@ -1018,7 +1046,8 @@ herbivore.pSEM.presence.absence <- psem(
 
   ## Tetraopes
   tetraopes.presence.absence.late.herb.toronto <- glm(
-  	Tetraopes.late ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  	Tetraopes.late ~ Danaus.early + Rhyssomatus.early + Aphis.early
+  	                 + Tetraopes.early + Liriomyza.early,
     data = final.presence.absence.data,
     family = binomial(link = "logit")
   	),
@@ -1031,7 +1060,8 @@ herbivore.pSEM.presence.absence <- psem(
   
   ## Liriomyza
   liriomyza.presence.absence.late.herb.toronto <- glm(
-  	Liriomyza.late ~ Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  	Liriomyza.late ~ Danaus.early + Rhyssomatus.early + Aphis.early
+  	                 + Tetraopes.early + Liriomyza.early,
     data = final.presence.absence.data,
     family = binomial(link = "logit"),
   	)
@@ -1084,7 +1114,7 @@ kable(
 
 
 \newpage
-## Urbanization & Herbivore Interactions (Hypothesized pSEM 3) |  Presence-Absence
+## Urbanization & Herbivore Interactions (Hypothesized pSEM 3)
 
 ```{r Urbanization & Herbivore Interactions pSEM Specification: Presence-Absence, echo = TRUE}
 ## Specify the urbanization pSEM
@@ -1096,7 +1126,8 @@ urbanization.herbivore.pSEM.presence.absence <- psem(
     family = binomial(link = "logit")
   	),
   danaus.presence.absence.late.urb_herb.toronto <- glm(
-  	Danaus.late ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  	Danaus.late ~ Distance + Danaus.early + Rhyssomatus.early
+  	              + Aphis.early + Tetraopes.early + Liriomyza.early,
     data = final.presence.absence.data,
     family = binomial(link = "logit")
   	),
@@ -1134,7 +1165,8 @@ urbanization.herbivore.pSEM.presence.absence <- psem(
     family = binomial(link = "logit")
   	),
   aphis.presence.absence.late.urb_herb.toronto <- glm(
-  	Aphis.late ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  	Aphis.late ~ Distance + Danaus.early + Rhyssomatus.early
+  	             + Aphis.early + Tetraopes.early + Liriomyza.early,
     data = final.presence.absence.data,
     family = binomial(link = "logit")
   	),
@@ -1154,7 +1186,8 @@ urbanization.herbivore.pSEM.presence.absence <- psem(
     family = binomial(link = "logit")
   	),
   tetraopes.presence.absence.late.urb_herb.toronto <- glm(
-  	Tetraopes.late ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  	Tetraopes.late ~ Distance + Danaus.early + Rhyssomatus.early
+  	                 + Aphis.early + Tetraopes.early + Liriomyza.early,
     data = final.presence.absence.data,
     family = binomial(link = "logit")
   	),
@@ -1172,7 +1205,8 @@ urbanization.herbivore.pSEM.presence.absence <- psem(
     family = binomial(link = "logit")
   	),
   liriomyza.presence.absence.late.urb_herb.toronto <- glm(
-  	Liriomyza.late ~ Distance + Danaus.early + Rhyssomatus.early + Aphis.early + Tetraopes.early + Liriomyza.early,
+  	Liriomyza.late ~ Distance + Danaus.early + Rhyssomatus.early
+  	                 + Aphis.early + Tetraopes.early + Liriomyza.early,
     data = final.presence.absence.data,
     family = binomial(link = "logit"),
   	)
@@ -1225,7 +1259,7 @@ kable(
 
 
 \newpage
-## pSEM Comparisons (Presence-Absence)
+## pSEM Comparisons
 
 | Model      | Fisher's *C*| df   | P    | $AIC_c$    | $\Delta AIC_c$ | K    |
 |:----------:|------------:|-----:|------:|----------:|---------------:|-----:|
@@ -1242,17 +1276,17 @@ Table: Summary of hypothesize pSEMs model fits and information theoretic compari
 \newpage
 # Appendix
 
-Estimated marginal means and contrasts were analyzed using the `emmeans` package. Predictions were weighted by cell frequency, and P-values were adjusted using the false discovery rate (FDR).
+Estimated marginal means and contrasts were calculated using the `emmeans` package. Predictions were weighted by cell frequency, and P-values were adjusted using the false discovery rate (FDR).
 
 
 \newpage
 ## Marginal Means: Abundance, Richness, & Diversity (Toronto)
 
-\vspace{18pt}
+\vspace{10pt}
 
 ### Toronto Abundance
 
-```{r Toronto Abundance ANCOVA Marginal Means, echo = TRUE, results = "hide"}
+```{r Toronto Abundance ANCOVA Marginal Means, echo = FALSE}
 ## emmeans
 # Season
 toronto.abundance.emmeans.season <- emmeans(
@@ -1271,14 +1305,13 @@ toronto.abundance.emmeans.distance_season <- emmeans(
 )
 ```
 
-\vspace{10pt}
-
 ```{r Toronto Abundance ANCOVA Marginal Means: Season Table, echo = FALSE}
 kable(
 	tidy(toronto.abundance.emmeans.season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of Season in the Toronto Abundance ANCOVA."
+	caption = "Estimated marginal means of the main effect of Season in the Toronto Abundance ANCOVA.",
+	col.names = c("Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1290,17 +1323,18 @@ kable(
 	tidy(toronto.abundance.emmeans.distance_season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between Distance and Season in the Toronto Abundance ANCOVA."
+	caption = "Estimated marginal means of the two-way interaction between Distance and Season in the Toronto Abundance ANCOVA.",
+	col.names = c("Season", "Distance", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 
+\vspace{10pt}
 
-\newpage
 ### Toronto Richness
 
-```{r Toronto Richness ANCOVA Marginal Means, echo = TRUE, results = "hide"}
+```{r Toronto Richness ANCOVA Marginal Means, echo = FALSE}
 ## emmeans
 # Season
 toronto.richness.emmeans.season <- emmeans(
@@ -1319,14 +1353,13 @@ toronto.richness.emmeans.distance_season <- emmeans(
 )
 ```
 
-\vspace{10pt}
-
 ```{r Toronto Richness ANCOVA Marginal Means: Season Table, echo = FALSE}
 kable(
 	tidy(toronto.richness.emmeans.season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of Season in the Toronto Richness ANCOVA."
+	caption = "Estimated marginal means of the main effect of Season in the Toronto Richness ANCOVA.",
+	col.names = c("Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1338,17 +1371,18 @@ kable(
 	tidy(toronto.richness.emmeans.distance_season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between Distance and Season in the Toronto Richness ANCOVA."
+	caption = "Estimated marginal means of the two-way interaction between Distance and Season in the Toronto Richness ANCOVA.",
+	col.names = c("Season", "Distance", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 
+\vspace{10pt}
 
-\newpage
 ### Toronto Diversity
 
-```{r Toronto Diversity ANCOVA Marginal Means, echo = TRUE, results = "hide"}
+```{r Toronto Diversity ANCOVA Marginal Means, echo = FALSE}
 ## emmeans
 # Season
 toronto.diversity.emmeans.season <- emmeans(
@@ -1367,14 +1401,13 @@ toronto.diversity.emmeans.distance_season <- emmeans(
 )
 ```
 
-\vspace{10pt}
-
 ```{r Toronto Diversity ANCOVA Marginal Means: Season Table, echo = FALSE}
 kable(
 	tidy(toronto.diversity.emmeans.season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of Season in the Toronto Diversity ANCOVA."
+	caption = "Estimated marginal means of the main effect of Season in the Toronto Diversity ANCOVA.",
+	col.names = c("Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1386,9 +1419,10 @@ kable(
 	tidy(toronto.diversity.emmeans.distance_season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between Distance and Season in the Toronto Diversity ANCOVA."
+	caption = "Estimated marginal means of the two-way interaction between Distance and Season in the Toronto Diversity ANCOVA.",
+	col.names = c("Season", "Distance", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 
@@ -1397,11 +1431,11 @@ kable(
 \newpage
 ## Marginal Means: Abundance, Richness, & Diversity (5 Cities)
 
-\vspace{18pt}
+\vspace{10pt}
 
 ### 5 Cities Abundance
 
-```{r 5 Cities Abundance ANOVA Marginal Means: Main Effects, echo = TRUE, results = "hide"}
+```{r 5 Cities Abundance ANOVA Marginal Means: Main Effects, echo = FALSE}
 ## emmeans
 # City
 five.cities.abundance.emmeans.city <- emmeans(
@@ -1428,9 +1462,7 @@ five.cities.abundance.emmeans.season <- emmeans(
 )
 ```
 
-\vspace{10pt}
-
-```{r 5 Cities Abundance ANOVA Marginal Means: Two-Way Interactions, echo = TRUE, results = "hide"}
+```{r 5 Cities Abundance ANOVA Marginal Means: Two-Way Interactions, echo = FALSE}
 ## emmeans
 # City x Habitat
 five.cities.abundance.emmeans.city_habitat <- emmeans(
@@ -1457,9 +1489,7 @@ five.cities.abundance.emmeans.habitat_season <- emmeans(
 )
 ```
 
-\vspace{10pt}
-
-```{r 5 Cities Abundance ANOVA Marginal Means: Three-Way Interaction, echo = TRUE, results = "hide"}
+```{r 5 Cities Abundance ANOVA Marginal Means: Three-Way Interaction, echo = FALSE}
 ## emmeans
 # City x Habitat x Season
 five.cities.abundance.emmeans.city_habitat_season <- emmeans(
@@ -1471,14 +1501,15 @@ five.cities.abundance.emmeans.city_habitat_season <- emmeans(
 ```
 
 
-\newpage
+\vspace{10pt}
 
 ```{r 5 Cities Abundance ANOVA Marginal Means: City Table, echo = FALSE}
 kable(
 	tidy(five.cities.abundance.emmeans.city$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of City in the 5 Cities Abundance ANOVA."
+	caption = "Estimated marginal means of the main effect of City in the 5 Cities Abundance ANOVA.",
+	col.names = c("City", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1490,7 +1521,8 @@ kable(
 	tidy(five.cities.abundance.emmeans.habitat$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of Habitat in the 5 Cities Abundance ANOVA."
+	caption = "Estimated marginal means of the main effect of Habitat in the 5 Cities Abundance ANOVA.",
+	col.names = c("Habitat", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1502,7 +1534,8 @@ kable(
 	tidy(five.cities.abundance.emmeans.season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of Season in the 5 Cities Abundance ANOVA."
+	caption = "Estimated marginal means of the main effect of Season in the 5 Cities Abundance ANOVA.",
+	col.names = c("Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1514,9 +1547,10 @@ kable(
 	tidy(five.cities.abundance.emmeans.city_habitat$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between City and Habitat in the 5 Cities Abundance ANOVA."
+	caption = "Estimated marginal means of the two-way interaction between City and Habitat in the 5 Cities Abundance ANOVA.",
+	col.names = c("City", "Habitat", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 \vspace{10pt}
@@ -1526,9 +1560,10 @@ kable(
 	tidy(five.cities.abundance.emmeans.city_season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between City and Season in the 5 Cities Abundance ANOVA."
+	caption = "Estimated marginal means of the two-way interaction between City and Season in the 5 Cities Abundance ANOVA.",
+	col.names = c("City", "Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 \vspace{10pt}
@@ -1538,9 +1573,10 @@ kable(
 	tidy(five.cities.abundance.emmeans.habitat_season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between Habitat and Season in the 5 Cities Abundance ANOVA."
+	caption = "Estimated marginal means of the two-way interaction between Habitat and Season in the 5 Cities Abundance ANOVA.",
+	col.names = c("Habitat", "Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 
@@ -1548,7 +1584,7 @@ kable(
 \newpage
 ### 5 Cities Richness
 
-```{r 5 Cities Richness ANOVA Marginal Means: Main Effects, echo = TRUE, results = "hide"}
+```{r 5 Cities Richness ANOVA Marginal Means: Main Effects, echo = FALSE}
 ## emmeans
 # City
 five.cities.richness.emmeans.city <- emmeans(
@@ -1575,9 +1611,7 @@ five.cities.richness.emmeans.season <- emmeans(
 )
 ```
 
-\vspace{10pt}
-
-```{r 5 Cities Richness ANOVA Marginal Means: Two-Way Interactions, echo = TRUE, results = "hide"}
+```{r 5 Cities Richness ANOVA Marginal Means: Two-Way Interactions, echo = FALSE}
 ## emmeans
 # City x Habitat
 five.cities.richness.emmeans.city_habitat <- emmeans(
@@ -1604,9 +1638,7 @@ five.cities.richness.emmeans.habitat_season <- emmeans(
 )
 ```
 
-\vspace{10pt}
-
-```{r 5 Cities Richness ANOVA Marginal Means: Three-Way Interaction, echo = TRUE, results = "hide"}
+```{r 5 Cities Richness ANOVA Marginal Means: Three-Way Interaction, echo = FALSE}
 ## emmeans
 # City x Habitat x Season
 five.cities.richness.emmeans.city_habitat_season <- emmeans(
@@ -1618,14 +1650,15 @@ five.cities.richness.emmeans.city_habitat_season <- emmeans(
 ```
 
 
-\newpage
+\vspace{10pt}
 
 ```{r 5 Cities Richness ANOVA Marginal Means: City Table, echo = FALSE}
 kable(
 	tidy(five.cities.richness.emmeans.city$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of City in the 5 Cities Richness ANOVA."
+	caption = "Estimated marginal means of the main effect of City in the 5 Cities Richness ANOVA.",
+	col.names = c("City", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1637,7 +1670,8 @@ kable(
 	tidy(five.cities.richness.emmeans.habitat$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of Habitat in the 5 Cities Richness ANOVA."
+	caption = "Estimated marginal means of the main effect of Habitat in the 5 Cities Richness ANOVA.",
+	col.names = c("Habitat", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1649,7 +1683,8 @@ kable(
 	tidy(five.cities.richness.emmeans.season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of Season in the 5 Cities Richness ANOVA."
+	caption = "Estimated marginal means of the main effect of Season in the 5 Cities Richness ANOVA.",
+	col.names = c("Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1661,9 +1696,10 @@ kable(
 	tidy(five.cities.richness.emmeans.city_habitat$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between City and Habitat in the 5 Cities Richness ANOVA."
+	caption = "Estimated marginal means of the two-way interaction between City and Habitat in the 5 Cities Richness ANOVA.",
+	col.names = c("City", "Habitat", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 \vspace{10pt}
@@ -1673,9 +1709,10 @@ kable(
 	tidy(five.cities.richness.emmeans.city_season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between City and Season in the 5 Cities Richness ANOVA."
+	caption = "Estimated marginal means of the two-way interaction between City and Season in the 5 Cities Richness ANOVA.",
+	col.names = c("City", "Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 \vspace{10pt}
@@ -1685,9 +1722,10 @@ kable(
 	tidy(five.cities.richness.emmeans.habitat_season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between Habitat and Season in the 5 Cities Richness ANOVA."
+	caption = "Estimated marginal means of the two-way interaction between Habitat and Season in the 5 Cities Richness ANOVA.",
+	col.names = c("Habitat", "Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 
@@ -1696,7 +1734,7 @@ kable(
 \newpage
 ### 5 Cities Diversity
 
-```{r 5 Cities Diversity ANOVA Marginal Means: Main Effects, echo = TRUE, results = "hide"}
+```{r 5 Cities Diversity ANOVA Marginal Means: Main Effects, echo = FALSE}
 ## emmeans
 # City
 five.cities.diversity.emmeans.city <- emmeans(
@@ -1723,9 +1761,7 @@ five.cities.diversity.emmeans.season <- emmeans(
 )
 ```
 
-\vspace{10pt}
-
-```{r 5 Cities Diversity ANOVA Marginal Means: Two-Way Interactions, echo = TRUE, results = "hide"}
+```{r 5 Cities Diversity ANOVA Marginal Means: Two-Way Interactions, echo = FALSE}
 ## emmeans
 # City x Habitat
 five.cities.diversity.emmeans.city_habitat <- emmeans(
@@ -1752,9 +1788,7 @@ five.cities.diversity.emmeans.habitat_season <- emmeans(
 )
 ```
 
-\vspace{10pt}
-
-```{r 5 Cities Diversity ANOVA Marginal Means: Three-Way Interaction, echo = TRUE, results = "hide"}
+```{r 5 Cities Diversity ANOVA Marginal Means: Three-Way Interaction, echo = FALSE}
 ## emmeans
 # City x Habitat x Season
 five.cities.diversity.emmeans.city_habitat_season <- emmeans(
@@ -1766,14 +1800,15 @@ five.cities.diversity.emmeans.city_habitat_season <- emmeans(
 ```
 
 
-\newpage
+\vspace{10pt}
 
 ```{r 5 Cities Diversity ANOVA Marginal Means: City Table, echo = FALSE}
 kable(
 	tidy(five.cities.diversity.emmeans.city$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of City in the 5 Cities Diversity ANOVA."
+	caption = "Estimated marginal means of the main effect of City in the 5 Cities Diversity ANOVA.",
+	col.names = c("City", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1785,7 +1820,8 @@ kable(
 	tidy(five.cities.diversity.emmeans.habitat$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of Habitat in the 5 Cities Diversity ANOVA."
+	caption = "Estimated marginal means of the main effect of Habitat in the 5 Cities Diversity ANOVA.",
+	col.names = c("Habitat", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1797,7 +1833,8 @@ kable(
 	tidy(five.cities.diversity.emmeans.season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of Season in the 5 Cities Diversity ANOVA."
+	caption = "Estimated marginal means of the main effect of Season in the 5 Cities Diversity ANOVA.",
+	col.names = c("Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1809,9 +1846,10 @@ kable(
 	tidy(five.cities.diversity.emmeans.city_habitat$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between City and Habitat in the 5 Cities Diversity ANOVA."
+	caption = "Estimated marginal means of the two-way interaction between City and Habitat in the 5 Cities Diversity ANOVA.",
+	col.names = c("City", "Habitat", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 \vspace{10pt}
@@ -1821,9 +1859,10 @@ kable(
 	tidy(five.cities.diversity.emmeans.city_season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between City and Season in the 5 Cities Diversity ANOVA."
+	caption = "Estimated marginal means of the two-way interaction between City and Season in the 5 Cities Diversity ANOVA.",
+	col.names = c("City", "Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 \vspace{10pt}
@@ -1833,9 +1872,10 @@ kable(
 	tidy(five.cities.diversity.emmeans.habitat_season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between Habitat and Season in the 5 Cities Diversity ANOVA."
+	caption = "Estimated marginal means of the two-way interaction between Habitat and Season in the 5 Cities Diversity ANOVA.",
+	col.names = c("Habitat", "Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 
@@ -1844,7 +1884,7 @@ kable(
 \newpage
 ## Marginal Means: Leaf Herbivory (Toronto)
 
-```{r Toronto Leaf Herbivory ANCOVA Marginal Means, echo = TRUE, results = "hide"}
+```{r Toronto Leaf Herbivory ANCOVA Marginal Means, echo = FALSE}
 ## emmeans
 # Season
 toronto.leaf.herbivory.emmeans.season <- emmeans(
@@ -1863,14 +1903,13 @@ toronto.leaf.herbivory.emmeans.distance_season <- emmeans(
 )
 ```
 
-\vspace{10pt}
-
 ```{r Toronto Leaf Herbivory ANCOVA Marginal Means: Season Table, echo = FALSE}
 kable(
 	tidy(toronto.leaf.herbivory.emmeans.season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of Season in the Toronto Leaf Herbivory ANCOVA."
+	caption = "Estimated marginal means of the main effect of Season in the Toronto Leaf Herbivory ANCOVA.",
+	col.names = c("Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1882,9 +1921,10 @@ kable(
 	tidy(toronto.leaf.herbivory.emmeans.distance_season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between Distance and Season in the Toronto Leaf Herbivory ANCOVA."
+	caption = "Estimated marginal means of the two-way interaction between Distance and Season in the Toronto Leaf Herbivory ANCOVA.",
+	col.names = c("Season", "Distance", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 
@@ -1892,7 +1932,7 @@ kable(
 \newpage
 ## Marginal Means: Leaf Herbivory (5 Cities)
 
-```{r 5 Cities Leaf Herbivory ANOVA Marginal Means: Main Effects, echo = TRUE, results = "hide"}
+```{r 5 Cities Leaf Herbivory ANOVA Marginal Means: Main Effects, echo = FALSE}
 ## emmeans
 # City
 five.cities.leaf.herbivory.emmeans.city <- emmeans(
@@ -1919,9 +1959,7 @@ five.cities.leaf.herbivory.emmeans.season <- emmeans(
 )
 ```
 
-\vspace{10pt}
-
-```{r 5 Cities Leaf Herbivory ANOVA Marginal Means: Two-Way Interactions, echo = TRUE, results = "hide"}
+```{r 5 Cities Leaf Herbivory ANOVA Marginal Means: Two-Way Interactions, echo = FALSE}
 ## emmeans
 # City x Habitat
 five.cities.leaf.herbivory.emmeans.city_habitat <- emmeans(
@@ -1948,9 +1986,7 @@ five.cities.leaf.herbivory.emmeans.habitat_season <- emmeans(
 )
 ```
 
-\vspace{10pt}
-
-```{r 5 Cities Leaf Herbivory ANOVA Marginal Means: Three-Way Interaction, echo = TRUE, results = "hide"}
+```{r 5 Cities Leaf Herbivory ANOVA Marginal Means: Three-Way Interaction, echo = FALSE}
 ## emmeans
 # City x Habitat x Season
 five.cities.leaf.herbivory.emmeans.city_habitat_season <- emmeans(
@@ -1962,14 +1998,15 @@ five.cities.leaf.herbivory.emmeans.city_habitat_season <- emmeans(
 ```
 
 
-\newpage
+\vspace{10pt}
 
 ```{r 5 Cities Leaf Herbivory ANOVA Marginal Means: City Table, echo = FALSE}
 kable(
 	tidy(five.cities.leaf.herbivory.emmeans.city$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of City in the 5 Cities Leaf Herbivory ANOVA."
+	caption = "Estimated marginal means of the main effect of City in the 5 Cities Leaf Herbivory ANOVA.",
+	col.names = c("City", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1981,7 +2018,8 @@ kable(
 	tidy(five.cities.leaf.herbivory.emmeans.habitat$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of Habitat in the 5 Cities Leaf Herbivory ANOVA."
+	caption = "Estimated marginal means of the main effect of Habitat in the 5 Cities Leaf Herbivory ANOVA.",
+	col.names = c("Habitat", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -1993,7 +2031,8 @@ kable(
 	tidy(five.cities.leaf.herbivory.emmeans.season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the main effect of Season in the 5 Cities Leaf Herbivory ANOVA."
+	caption = "Estimated marginal means of the main effect of Season in the 5 Cities Leaf Herbivory ANOVA.",
+	col.names = c("Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
@@ -2005,9 +2044,10 @@ kable(
 	tidy(five.cities.leaf.herbivory.emmeans.city_habitat$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between City and Habitat in the 5 Cities Leaf Herbivory ANOVA."
+	caption = "Estimated marginal means of the two-way interaction between City and Habitat in the 5 Cities Leaf Herbivory ANOVA.",
+	col.names = c("City", "Habitat", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 \vspace{10pt}
@@ -2017,9 +2057,10 @@ kable(
 	tidy(five.cities.leaf.herbivory.emmeans.city_season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between City and Season in the 5 Cities Leaf Herbivory ANOVA."
+	caption = "Estimated marginal means of the two-way interaction between City and Season in the 5 Cities Leaf Herbivory ANOVA.",
+	col.names = c("City", "Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 \vspace{10pt}
@@ -2029,9 +2070,10 @@ kable(
 	tidy(five.cities.leaf.herbivory.emmeans.habitat_season$emmeans),
 	booktabs = TRUE, 
 	digits = 3, 
-	caption = "Estimated marginal means of the two-way interaction between Habitat and Season in the 5 Cities Leaf Herbivory ANOVA."
+	caption = "Estimated marginal means of the two-way interaction between Habitat and Season in the 5 Cities Leaf Herbivory ANOVA.",
+	col.names = c("Habitat", "Season", "Estimate", "SE", "df", "statistic", "P_FDR")
 	) %>%
-	kable_styling(latex_options = c("HOLD_position", "striped", "scale_down"))
+	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
 
 
@@ -2040,7 +2082,7 @@ kable(
 \newpage
 ## Contrasts: Abundance, Richness, & Diversity (Toronto)
 
-\vspace{18pt}
+\vspace{10pt}
 
 ### Toronto Abundance
 
@@ -2132,7 +2174,7 @@ kable(
 \newpage
 ## Contrasts: Abundance, Richness, & Diversity (5 Cities)
 
-\vspace{18pt}
+\vspace{10pt}
 
 ### 5 Cities Abundance
 
