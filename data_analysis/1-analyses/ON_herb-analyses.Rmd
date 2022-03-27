@@ -1264,8 +1264,8 @@ kable(
 | Model      | Fisher's *C*| df   | P    | $AIC_c$    | $\Delta AIC_c$ | K    |
 |:----------:|------------:|-----:|------:|----------:|---------------:|-----:|
 | pSEM 2     | 0           | 8    | 0.999 | 87.100    | 0              | 26   |
-| pSEM 1     | 62.180      | 90   | 0.989 | 148.827   | 85.102         | 20   |
-| pSEM 3     | 0           | 8    | 0.999 | 219.760   | 132.681        | 41   |
+| pSEM 1     | 62.180      | 90   | 0.989 | 148.827   | 61.727         | 20   |
+| pSEM 3     | 0           | 8    | 0.999 | 219.760   | 132.660        | 41   |
 
 Table: Summary of hypothesize pSEMs model fits and information theoretic comparisons using presence-absence data. We report the model name (pSEM 1 = urbanization, pSEM 2 = herbivore interactions, and pSEM 3 = urbanization and herbivore interactions), Fisher's *C* statistic of goodness-of-fit, degrees of freedom in the pSEM (df), P-value associated with pSEM goodness-of-fit test (P), Akaike's information criteria with a sample size correction ($AIC_c$), difference in $AIC_c$ between the candidate pSEM and the best-supported pSEM ($\Delta AIC_c$), and the number of parameters fitted in the model (K).
 
