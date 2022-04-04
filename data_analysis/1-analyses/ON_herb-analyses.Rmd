@@ -98,9 +98,6 @@ five.cities.leaf.damage <- read_csv(
 	col_types = c("ffffnfn"),
 	show_col_types = FALSE
 	)
-
-# Species dispersal traits
-species.traits <- read.csv("data/species_dispersal_traits.csv")
 ```
 
 
@@ -126,11 +123,11 @@ toronto.herbivores$Diversity <- diversity(
 
 # 5 Cities richness
 five.cities.herbivores$Richness <- specnumber(
-	five.cities.herbivores[, 7:15]
+	five.cities.herbivores[, 7:14]
 )
 # 5 Cities diversity
 five.cities.herbivores$Diversity <- diversity(
-	five.cities.herbivores[, 7:15],
+	five.cities.herbivores[, 7:14],
 	index = "shannon"
 )
 ```
@@ -177,7 +174,7 @@ sum(E2^2) / (N - p)
 
 \vspace{10pt}
 
-```{r Toronto Abundance ANCOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the Toronto abundance ANCOVA. The model had slight but acceptable over-dispersion (dispersion statistic = 1.250)"}
+```{r Toronto Abundance ANCOVA: Check Assumptions, eval = FALSE, fig.cap = "Diagnostic plots of the Toronto abundance ANCOVA. The model had slight but acceptable over-dispersion (dispersion statistic = 1.250)"}
 check_model(toronto.abundance.ANCOVA)
 ```
 
@@ -216,7 +213,7 @@ check_overdispersion(toronto.richness.ANCOVA)
 
 \vspace{10pt}
 
-```{r Toronto Richness ANCOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the Toronto richness ANCOVA. The model has acceptable dispersion (dispersion statistics = 0.437)."}
+```{r Toronto Richness ANCOVA: Check Assumptions, eval = FALSE, fig.cap = "Diagnostic plots of the Toronto richness ANCOVA. The model has acceptable dispersion (dispersion statistics = 0.437)."}
 check_model(toronto.richness.ANCOVA)
 ```
 
@@ -246,7 +243,7 @@ toronto.diversity.ANCOVA <- lm(
 
 \vspace{10pt}
 
-```{r Toronto Diversity ANCOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the Toronto diversity ANCOVA."}
+```{r Toronto Diversity ANCOVA: Check Assumptions, eval = FALSE, fig.cap = "Diagnostic plots of the Toronto diversity ANCOVA."}
 check_model(toronto.diversity.ANCOVA)
 ```
 
@@ -290,7 +287,7 @@ sum(E2^2) / (N - p)
 
 \vspace{10pt}
 
-```{r 5 Cities Abundance ANOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the 5 Cities abundance ANOVA. The model has good dispersion (dispersion statistic = 0.959)."}
+```{r 5 Cities Abundance ANOVA: Check Assumptions, eval = FALSE, fig.cap = "Diagnostic plots of the 5 Cities abundance ANOVA. The model has good dispersion (dispersion statistic = 0.959)."}
 check_model(five.cities.abundance.ANOVA)
 ```
 
@@ -320,7 +317,7 @@ five.cities.richness.ANOVA <- lm(
 
 \vspace{10pt}
 
-```{r 5 Cities Richness ANOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the 5 Cities richness ANOVA. The "}
+```{r 5 Cities Richness ANOVA: Check Assumptions, eval = FALSE, fig.cap = "Diagnostic plots of the 5 Cities richness ANOVA. The "}
 check_model(five.cities.richness.ANOVA)
 ```
 
@@ -350,7 +347,7 @@ five.cities.diversity.ANOVA <- lm(
 
 \vspace{10pt}
 
-```{r 5 Cities Diversity ANOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the 5 Cities diversity ANOVA."}
+```{r 5 Cities Diversity ANOVA: Check Assumptions, eval = FALSE, fig.cap = "Diagnostic plots of the 5 Cities diversity ANOVA."}
 check_model(five.cities.diversity.ANOVA)
 ```
 
@@ -415,7 +412,7 @@ toronto.leaf.herbivory.LMM <- lmer(
 
 \vspace{10pt}
 
-```{r Toronto Leaf Herbivory ANOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the Toronto leaf herbivory linear mixed-effects model."}
+```{r Toronto Leaf Herbivory ANOVA: Check Assumptions, eval = FALSE, fig.cap = "Diagnostic plots of the Toronto leaf herbivory linear mixed-effects model."}
 check_model(toronto.leaf.herbivory.LMM)
 ```
 
@@ -449,7 +446,7 @@ five.cities.leaf.herbivory.LMM <- lmer(
 
 \vspace{10pt}
 
-```{r 5 Cities Leaf Herbivory ANOVA: Check Assumptions, include = FALSE, fig.cap = "Diagnostic plots of the 5 Cities leaf herbivory linear mixed-effects model."}
+```{r 5 Cities Leaf Herbivory ANOVA: Check Assumptions, eval = FALSE, fig.cap = "Diagnostic plots of the 5 Cities leaf herbivory linear mixed-effects model."}
 check_model(five.cities.leaf.herbivory.LMM)
 ```
 
@@ -478,8 +475,6 @@ We first created a separate site-by-species abundance matrix for the Toronto and
 
 $$ Abundance\ Matrix =  Distance + Season + Distance: Season$$
 
-
-
 where the effects of distance, season, and the two-way interaction were evaluated. The 5 Cities model was fitted as:
 
 $$ Abundance\ Matrix =  City\ [C] + Habitat\ [H] + Season [S] + C:H + C:S + H:S + C:H:S$$
@@ -500,7 +495,7 @@ toronto.community.matrix <- toronto.herbivores[, 7:15] %>%
 	as.data.frame()
 
 ## Set the 5 Cities community matrix
-five.cities.community.matrix <- five.cities.herbivores[, 7:15] %>%
+five.cities.community.matrix <- five.cities.herbivores[, 7:14] %>%
 	as.data.frame()
 ```
 
@@ -520,7 +515,7 @@ toronto.herbivore.community.model <- manyglm(
 
 \vspace{10pt}
 
-```{r Toronto Herbivore Community: Check manyglm Assumptions, include = FALSE, fig.cap = "Diagnostic plot of the Toronto herbivore community manyglm model."}
+```{r Toronto Herbivore Community: Check manyglm Assumptions, eval = FALSE, fig.cap = "Diagnostic plot of the Toronto herbivore community manyglm model."}
 plot(toronto.herbivore.community.model)
 ```
 
@@ -588,7 +583,7 @@ five.cities.herbivore.community.model <- manyglm(
 
 \vspace{10pt}
 
-```{r 5 Cities Herbivore Community: Check manyglm Assumptions, include = FALSE, fig.cap = "Diagnostic plot of the 5 Cities herbivore community manyglm model."}
+```{r 5 Cities Herbivore Community: Check manyglm Assumptions, eval = FALSE, fig.cap = "Diagnostic plot of the 5 Cities herbivore community manyglm model."}
 plot(five.cities.herbivore.community.model)
 ```
 
@@ -642,199 +637,155 @@ kable(
 
 
 
-\newpage
-# Dispersal-Urbanization Relationships
-
-We evaluated whether abundances of different dispersal traits varied with urbanization using a similar approach to the multivariate GLMs for community composition and herbivore species. Instead of supplying a site-by-species abundance matrix as the response, we calculated the abundances of each trait for each site and provided a site-by-trait-abundance matrix as the response. This approach allows us to identify if dispersal ability is associated with urbanization and how the abundance of dispersal traits varies with urbanization.
-
-We fitted the Toronto and 5 Cities `manyglm()` models exactly like the community composition and herbivore species models, except for the site-by-trait-abundance matrix as the response. Both models were fitted using GLMs with a negative-binomial error distribution, and model assumptions were evaluated graphically. The influence of main effects and interactions in the model was determined using likelihood ratio tests and resampling, resulting in a multivariate test for the overall abundance matrix and univariate tests for each herbivore species. We used 999 resampling iterations, with P-values adjusted for multiple testing through an automated step-down resampling procedure.
-
 
 \newpage
-```{r Trait Abundance Function, echo = TRUE}
-## Function to calculate trait abundances for each site
-trait_by_population_abundance <- function(j) {
-	## Load required packages
-	require(dplyr)
-	
-	## Set trait matrix
-	trait.matrix <- species.traits
-	
-	## Sequentially calculate abundances for each trait for all sites in the supplied taxa matrix
-	dispersal.1000_km  <- j * trait.matrix[, 2] [match(names(j), trait.matrix$Species)][col(j)]
-	dispersal.100_km   <- j * trait.matrix[, 3] [match(names(j), trait.matrix$Species)][col(j)]
-	dispersal.30_40_km <- j * trait.matrix[, 4] [match(names(j), trait.matrix$Species)][col(j)]
-	dispersal.10_15_km <- j * trait.matrix[, 5] [match(names(j), trait.matrix$Species)][col(j)]
-	dispersal.1_2_km   <- j * trait.matrix[, 6] [match(names(j), trait.matrix$Species)][col(j)]
-	
-	## Set list of traits; remove UID column
-	trait.list <- list(
-		dispersal.1000_km[, -1], dispersal.100_km[, -1], dispersal.30_40_km,
-		dispersal.10_15_km[, -1], dispersal.1_2_km[, -1]
+# Abundance-by-Dispersal Relationships
+
+We evaluated how herbivore abundance responses to urbanization varies with dispersal ability for using linear models. For Toronto, we regressed the slope of abundance-by-distance for each of the herbivore species against the ln-transformed dispersal ability of the herbivores. For the 5 Cities, we used a similar approach except we used the mean difference in abundance between rural and urban habitats for each of the herbivore species as the response; the mean difference was averaged across all 5 Cities. We extracted slopes and mean differences for each of the herbivores for both the early and late seasons, yielding 18 estimates for Toronto ($9 herbivores \times 2 seasons = 18 estimates$) and 16 estimates for the 5 Cities ($8 herbivores \times 2 seasons = 16 estimates$; *Myzocallis* was not observed in the 5 Cities, only in Toronto). Slopes and mean differences were taken from the negative binomial GLMs used in the community composition and herbivore-specific analyses. We used the absolute value of the abundance response to measure the magnitude of the overall response to urbanization and not the direction. Both the Toronto and 5 Cities abundance-by-dispersal using the same model structure:
+
+$$ Abundance\ Response =  ln(Dispersal\ Ability) + Season + ln(Dispersal\ Ability):Season$$
+
+where the abundance response was compared against dispersal ability (ln-transformed), season (early or late), and the two-way interaction were evaluated. Separate models were fitted for Toronto and the 5 Cities. All model assumptions were inspected graphically using `check_model()`, and the influence of main effects and interactions was determined with Type III sums-of-squares using `Anova()`.
+
+
+```{r Dispersal-Urbanization Relationship: Toronto Data Management, echo = TRUE}
+## Toronto
+# Absolute value of the slope from the abundance by distance negative binomial GLMs
+abundance.by.distance.slope <- c(
+	# Early season
+	0.02443, 0.006987, 0.1639, 0.03487, 0.3876, 0.45945,
+	0.2642, 0.08917, 0.006558,
+	# Late season
+	0.02187, 0.007494, 0.16076, 0.03788, 0.3822, 0.6775,
+	0.2846, 0.08681, 0.003538
 	)
-	
-	
-	## Sum trait abundances by site
-	trait.abundances.bin.1 <- sapply(trait.list, FUN = rowSums, USE.NAMES = TRUE) %>%
-		as_tibble()
 
-	## Rename trait columns
-	colnames(trait.abundances.bin.1)[1:5] <- colnames(trait.matrix)[2:6]
-	
-	## Set final trait abundance tibble
-	trait.abundances <- trait.abundances.bin.1 %>%
-		as_tibble()
-}
+# List of dispersal distances for each of the 9 herbivore species
+ln.toronto.dispersal.distances <- c(
+	# Early season, alphabetical by species
+	log(100), log(1000), log(1000), log(15), log(40), log(100),
+	log(40), log(2), log(40),
+	# Late season, alphabetical by species
+	log(100), log(1000), log(1000), log(15), log(40), log(100),
+	log(40), log(2), log(40)
+	)
+
+# Vector of season for analysis
+toronto.season <- c(rep("Early", 9), rep("Late", 9))
+
+# Put the data together
+toronto.dispersal.data <- tibble(
+	abundance.by.distance.slope,
+	ln.toronto.dispersal.distances,
+	toronto.season
+	) %>%
+	rename(
+		"Abundance" = "abundance.by.distance.slope",
+		"ln.Dispersal" = "ln.toronto.dispersal.distances",
+		"Season" = "toronto.season"
+	)
 ```
 
 \vspace{10pt}
 
-```{r Calculate Trait Abundances, echo = TRUE}
-## Calculate Toronto trait abundances
-toronto.trait.abundances <- trait_by_population_abundance(
-	toronto.community.matrix
+```{r Dispersal-Urbanization Relationship: 5 Cities Data Management, echo = TRUE}
+## 5 Cities
+# Mean difference between rural and urban habitats, averaged across cities
+# Difference = Rural - Urban (given on the log scale)
+# Only 8 herbivores in the analysis (Myzocallis absent from all samples)
+abundance.by.habitat.differences <- c(
+	# Early season
+	7.06, 0.27, 0, 0.559, 0, 8.88, 8.6, 0.0365,
+	# Late season
+	16.8, 5.01, 8.92, 1.29, 0.0832, 2.25, 5.12, 3.39
 	)
 
-## Calculate 5 Cities trait abundances
-five.cities.trait.abundances <- trait_by_population_abundance(
-	five.cities.community.matrix
+# List of dispersal distances for each of the 8 herbivore species present
+ln.five.cities.dispersal.distances <- c(
+	# Early season, alphabetical by species
+	log(100), log(1000), log(1000), log(15), log(40),
+	log(40), log(2), log(40),
+	# Late season, alphabetical by species
+	log(100), log(1000), log(1000), log(15), log(40),
+	log(40), log(2), log(40)
+	)
+
+# Vector of season for analysis
+five.cities.season <- c(rep("Early", 8), rep("Late", 8))
+
+# Put the data together
+five.cities.dispersal.data <- tibble(
+	abundance.by.habitat.differences,
+	ln.five.cities.dispersal.distances,
+	five.cities.season
+	) %>%
+	rename(
+		"Abundance" = "abundance.by.habitat.differences",
+		"ln.Dispersal" = "ln.five.cities.dispersal.distances",
+		"Season" = "five.cities.season"
 	)
 ```
+
 
 
 
 \newpage
 ## Toronto
 
-```{r Toronto Dispersal Traits: manyglm Fitting, echo = TRUE}
-## Fit the Toronto herbivore community model
-toronto.dispersal.traits.model <- manyglm(
-	mvabund(toronto.trait.abundances) ~ Distance * Season,
-	data = toronto.herbivores,
-	family = "negative_binomial"
-	)
+```{r Toronto Abundance-by-Dispersal Regression, echo = TRUE}
+## Fit the model
+toronto.dispersal.regression <- lm(
+	Abundance ~ ln.Dispersal * Season,
+	data = toronto.dispersal.data
+)
 ```
 
 \vspace{10pt}
 
-```{r Toronto Dispersal Traits: Check manyglm Assumptions, include = FALSE, fig.cap = "Diagnostic plot of the Toronto dispersal traits manyglm model."}
-plot(toronto.dispersal.traits.model)
+```{r Toronto Abundance-by-Dispersal Regression: Check Assumptions, eval = FALSE, fig.cap = "Diagnostic plots of the Toronto abundance-by-dispersal regression."}
+check_model(toronto.dispersal.regression)
 ```
 
 \vspace{10pt}
 
-```{r Toronto Dispersal Traits: manyglm ANOVA, echo = TRUE}
-## ANOVA on the Toronto herbivore community manyglm
-toronto.dispersal.traits.anova <- anova(
-	toronto.dispersal.traits.model,
-	nBoot = 999,
-	p.uni = "adjusted"
-	)
-```
-
-
-\newpage
-
-```{r Toronto Dispersal Traits: ANOVA Summary, echo = FALSE}
+```{r Toronto Abundance-by-Dispersal Regression: ANOVA Table, echo = FALSE}
 kable(
-	toronto.dispersal.traits.anova$table,
+	Anova(toronto.dispersal.regression, type = "III"),
 	booktabs = TRUE,
 	digits = 3,
-	caption = "Overall summary of the Toronto dispersal traits manyglm.",
-	col.names = c("Residual df", "df", "Test Statistic", "P-value")
+	caption = "Results of the Toronto abundance-by-dispersal regression, comparing dabundance by the natural log of dispersal ability, season, and the two-way interaction. Adjusted R-squared = -0.209.",
+	col.names = c("Sums-of-Squares", "df", "F", "P-value")
 	) %>% 
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
-
-\vspace{10pt}
-
-```{r Toronto Dispersal Traits: Individual Test Statistics, echo = FALSE}
-kable(
-	toronto.dispersal.traits.anova$uni.test,
-	booktabs = TRUE,
-	digits = 3,
-	caption = "Test statistics for each species in the Toronto dispersal traits manyglm."
-	) %>% 
-	kable_styling(latex_options = c("HOLD_position", "striped"))
-```
-
-\vspace{10pt}
-
-```{r Toronto Dispersal Traits: Individual P-Values, echo = FALSE}
-kable(
-	toronto.dispersal.traits.anova$uni.p,
-	booktabs = TRUE,
-	digits = 3,
-	caption = "P-values associated with the test statistics for each species in the Toronto dispersal traits manyglm."
-	) %>% 
-	kable_styling(latex_options = c("HOLD_position", "striped"))
-```
-
 
 
 \newpage
 ## 5 Cities
 
-```{r 5 Cities Dispersal Traits: manyglm Fitting, echo = TRUE}
-## Fit the 5 Cities herbivore community model
-five.cities.dispersal.traits.model <- manyglm(
-	mvabund(five.cities.trait.abundances) ~ City * Habitat * Season,
-	data = five.cities.herbivores,
-	family = "negative_binomial"
-	)
+```{r 5 Cities Abundance-by-Dispersal Regression, echo = TRUE}
+## Fit the model
+five.cities.dispersal.regression <- lm(
+	Abundance ~ ln.Dispersal * Season,
+	data = five.cities.dispersal.data
+)
 ```
 
 \vspace{10pt}
 
-```{r 5 Cities Dispersal Traits: Check manyglm Assumptions, include = FALSE, fig.cap = "Diagnostic plot of the 5 Cities dispersal traits manyglm model."}
-plot(five.cities.dispersal.traits.model)
+```{r 5 Cities Abundance-by-Dispersal Regression: Check Assumptions, eval = FALSE, fig.cap = "Diagnostic plots of the 5 Cities abundance-by-dispersal regression."}
+check_model(five.cities.dispersal.regression)
 ```
 
 \vspace{10pt}
 
-```{r 5 Cities Dispersal Traits: manyglm ANOVA, echo = TRUE}
-## ANOVA on the 5 Cities herbivore community manyglm
-five.cities.dispersal.traits.anova <- anova(
-	five.cities.dispersal.traits.model,
-	nBoot = 999,
-	p.uni = "adjusted"
-	)
-```
-
-
-\newpage
-
-```{r 5 Cities Dispersal Traits: ANOVA Summary, echo = FALSE}
+```{r 5 Cities Abundance-by-Dispersal Regression: ANOVA Table, echo = FALSE}
 kable(
-	five.cities.dispersal.traits.anova$table,
+	Anova(five.cities.dispersal.regression, type = "III"),
 	booktabs = TRUE,
 	digits = 3,
-	caption = "Overall summary of the 5 Cities dispersal traits manyglm.",
-	col.names = c("Residual df", "df", "Test Statistic", "P-value")
-	) %>% 
-	kable_styling(latex_options = c("HOLD_position", "striped"))
-```
-
-\vspace{10pt}
-
-```{r 5 Cities Dispersal Traits: Individual Test Statistics, echo = FALSE}
-kable(
-	five.cities.dispersal.traits.anova$uni.test,
-	booktabs = TRUE,
-	digits = 3,
-	caption = "Test statistics for each species in the 5 Cities dispersal traits manyglm."
-	) %>% 
-	kable_styling(latex_options = c("HOLD_position", "striped"))
-```
-
-\vspace{10pt}
-
-```{r 5 Cities Dispersal Traits: Individual P-Values, echo = FALSE}
-kable(
-	five.cities.dispersal.traits.anova$uni.p,
-	booktabs = TRUE,
-	digits = 3,
-	caption = "P-values associated with the test statistics for each species in the 5 Cities dispersal traits manyglm."
+	caption = "Results of the 5 Cities abundance-by-dispersal regression, comparing dabundance by the natural log of dispersal ability, season, and the two-way interaction. Adjusted R-squared = 0.005.",
+	col.names = c("Sums-of-Squares", "df", "F", "P-value")
 	) %>% 
 	kable_styling(latex_options = c("HOLD_position", "striped"))
 ```
