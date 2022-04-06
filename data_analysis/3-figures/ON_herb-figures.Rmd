@@ -718,13 +718,13 @@ five.cities.herbivore.abundances.wide <- five.cities.herbivores %>%
 
 five.cities.herbivore.abundances.long.filtered <- five.cities.herbivore.abundances.wide %>%
 	gather(Herbivore_Species, Measurement, Danaus:Liriomyza, factor_key = TRUE) %>%
-	filter(Herbivore_Species != "Aphis")
+	filter(Herbivore_Species == "Rhyssomatus" | Herbivore_Species == "Liriomyza")
 
 ## Toronto colour palette
 toronto.continuous <- cal_palette(name = "kelp1", n = 9, type = "continuous")
 
 ## Set the 5 Cities herbivore palette to match Toronto
-five.cities.herbivore.colours <- toronto.continuous[c(1:2, 5:9)]
+five.cities.herbivore.colours <- toronto.continuous[c(2, 9)]
 ```
 
 \vspace{10pt}
@@ -800,14 +800,14 @@ five.cities.herbivore.abundances.figure <- ggarrange(
 
 \vspace{10pt}
 
-```{r Export the 5 Cities Herbivore Abundances (No Aphids) Figure, echo = TRUE}
+```{r Export the 5 Cities Herbivore Abundances Figure, echo = TRUE}
 ## Export the figure
 ggsave("fig_7-five.cities_herbivore_abundances-base.pdf", 
 			 plot = five.cities.herbivore.abundances.figure,
 			 device = "pdf",
 			 path = "figures/",
 			 width = 15,
-			 height = 10,
+			 height = 7.5,
 			 units = "in",
 			 dpi = 900)
 ```
