@@ -29,6 +29,7 @@ library(knitr)
 
 ```{r Load Packages, include = FALSE}
 ## Load packages for data management and analysis
+library(AICcmodavg)
 library(broom)
 library(car)
 library(easystats)
