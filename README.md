@@ -2,12 +2,13 @@
 
 Data, code, and metadata for the manuscript:
 
-Miles, L.S., D. Murray-Stoker, V. J. Nhan, and M. T. J. Johnson. Effects of urbanization on specialist herbivorous insect communities of milkweed are mediated by spatial and temporal variation.
+Miles^+^, L.S., D. Murray-Stoker^+^, V. J. Nhan, and M. T. J. Johnson. Effects of urbanization on specialist herbivorous insect communities of milkweed are mediated by spatial and temporal variation.
 
+^*^ Co-first authors
 
 ## Abstract
 
-Abstract goes here.
+Urbanization drastically alters landscapes in ways that can threaten local biodiversity. Although species loss has been well documented in urban habitats, why some species persist and not others, and how species interactions change, remain poorly understood, especially for species with specialized niche requirements. Here, we test the hypothesis that urbanization disrupts specialized plant-herbivore species interactions, and these effects vary according to the characteristics of both cities and the features of the organisms themselves. To test this hypothesis, we surveyed milkweed specialist herbivore communities. in the early and late growing season of the common milkweed (*Asclepias syriaca*) across six cities that varied in size by two orders of magnitude. Four results are most important to answering our research questions: (i) herbivore species abundance was higher in urban compared to rural habitats, whereas leaf herbivory was higher in rural compared to urban habitats, and these effects varied between seasons and among cities. (ii) The higher species diversity and abundance is likely due to a few species being more associated with rural habitats, and other species more common in urban habitats, and thus urbanization alters insects community composition. (iii) The species with the lowest dispersal abilitiesy, *R. linneaticollis* and *L. asclepiadis*, were those that were most strongly affected by urbanization, with *R. linneaticollis* less abundant and *L. asclepiadis* more abundant in urban areas. (iv) Urbanization influenced plant-herbivore interactions by reducing herbivory, but it did not alter species interactions among herbivorous insects. Biodiversity loss, particularly declines of habitat and host specialists, in urban areas remains a critical concern for conservation; however, our results indicate that at least some pecialist herbivores are more abundant in urban areas compared to rural areas and that species interactions remain intact.
 
 
 ## Contents
