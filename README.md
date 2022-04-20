@@ -2,9 +2,11 @@
 
 Data, code, and metadata for the manuscript:
 
-Miles^+^, L.S., D. Murray-Stoker^+^, V. J. Nhan, and M. T. J. Johnson. Effects of urbanization on specialist herbivorous insect communities of milkweed are mediated by spatial and temporal variation.
+Miles<sup>+</sup>, L.S., D. Murray-Stoker<sup>+</sup>, V. J. Nhan, and M. T. J. Johnson. Effects of urbanization on specialist herbivorous insect communities of milkweed are mediated by spatial and temporal variation.
 
-^*^ Co-first authors
+<sup>+</sup> Co-first authors
+
+[![DOI](https://zenodo.org/badge/378555232.svg)](https://zenodo.org/badge/latestdoi/378555232)
 
 ## Abstract
 
